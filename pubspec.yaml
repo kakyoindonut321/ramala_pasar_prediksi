@@ -56,6 +56,7 @@ dependencies:
   intl: ^0.20.3
   timezone: ^0.11.2
   permission_handler: ^13.0.2
+  google_fonts: ^8.2.1
 
 dev_dependencies:
   flutter_test:
