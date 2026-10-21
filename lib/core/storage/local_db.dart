@@ -69,4 +69,23 @@ class LocalDb {
     await db.delete('chat_messages');
     await db.delete('search_history');
   }
+
+  static Future<void> addChat(String role, String content) async {
+    final db = await _d;
+    await db.insert('chat_messages', {
+      'role': role,
+      'content': content,
+      'created_at': DateTime.now().millisecondsSinceEpoch,
+    });
+  }
+
+  static Future<List<Map<String, Object?>>> chatHistory({
+    int limit = 50,
+  }) async {
+    final db = await _d;
+    final r = await db.query('chat_messages', orderBy: 'id desc', limit: limit);
+    return r.reversed.toList();
+  }
+
+  static Future<void> clearChat() async => (await _d).delete('chat_messages');
 }

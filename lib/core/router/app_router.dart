@@ -4,8 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ramala/features/admin/presentation/admin_page.dart';
+import 'package:ramala/features/chatbot/presentation/chat_page.dart';
+import 'package:ramala/features/converter/presentation/converter_page.dart';
+import 'package:ramala/features/game/presentation/game_page.dart';
 import 'package:ramala/features/ledger/presentation/ledger_page.dart';
+import 'package:ramala/features/nearby/presentation/nearby_page.dart';
 import 'package:ramala/features/notification/presentation/notification_page.dart';
+import 'package:ramala/shell/features_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:ramala/features/auth/presentation/login_page.dart';
 import 'package:ramala/features/auth/presentation/register_page.dart';
@@ -55,6 +60,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/market/:id',
         builder: (_, s) => MarketDetailPage(s.pathParameters['id']!),
       ),
+      GoRoute(path: '/konverter', builder: (_, __) => const ConverterPage()),
+      GoRoute(path: '/nearby', builder: (_, __) => const NearbyPage()),
+      GoRoute(path: '/game', builder: (_, __) => const GamePage()),
+      GoRoute(path: '/chatbot', builder: (_, __) => const ChatPage()),
       GoRoute(
         path: '/notifikasi',
         builder: (_, __) => const NotificationPage(),
@@ -78,6 +87,11 @@ final routerProvider = Provider<GoRouter>((ref) {
                 path: '/portofolio',
                 builder: (_, __) => const PortfolioPage(),
               ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(path: '/fitur', builder: (_, __) => const FeaturesPage()),
             ],
           ),
           StatefulShellBranch(

@@ -78,6 +78,7 @@ class _MainShellState extends ConsumerState<MainShell> {
             'Portofolio',
             Icons.account_balance_wallet,
           ),
+          AppNavItem(Icons.apps_outlined, 'Fitur', Icons.apps),
           AppNavItem(Icons.rate_review_outlined, 'Saran', Icons.rate_review),
           AppNavItem(Icons.person_outline, 'Profil', Icons.person),
         ],
