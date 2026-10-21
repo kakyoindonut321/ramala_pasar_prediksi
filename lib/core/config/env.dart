@@ -7,4 +7,5 @@ class Env {
   static const cloudinaryPreset = String.fromEnvironment(
     'CLOUDINARY_UPLOAD_PRESET',
   );
+  static const geminiKey = String.fromEnvironment('GEMINI_API_KEY');
 }

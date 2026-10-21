@@ -3,11 +3,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ramala/features/admin/presentation/admin_page.dart';
+import 'package:ramala/features/ledger/presentation/ledger_page.dart';
+import 'package:ramala/features/notification/presentation/notification_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:ramala/features/auth/presentation/login_page.dart';
 import 'package:ramala/features/auth/presentation/register_page.dart';
 import 'package:ramala/shell/main_shell.dart';
-import 'package:ramala/shell/placeholder_page.dart';
+// import 'package:ramala/shell/placeholder_page.dart';
 import 'package:ramala/features/feedback/presentation/feedback_page.dart';
 import 'package:ramala/features/profile/presentation/profile_page.dart';
 import 'package:ramala/features/market/presentation/market_detail_page.dart';
@@ -52,6 +55,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/market/:id',
         builder: (_, s) => MarketDetailPage(s.pathParameters['id']!),
       ),
+      GoRoute(
+        path: '/notifikasi',
+        builder: (_, __) => const NotificationPage(),
+      ),
+      GoRoute(path: '/ledger', builder: (_, __) => const LedgerPage()),
+      GoRoute(path: '/admin', builder: (_, __) => const AdminPage()),
       StatefulShellRoute.indexedStack(
         builder: (_, __, shell) => MainShell(shell),
         branches: [

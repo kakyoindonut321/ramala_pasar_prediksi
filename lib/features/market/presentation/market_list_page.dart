@@ -7,6 +7,7 @@ import 'package:ramala/features/market/domain/market.dart';
 import 'package:ramala/features/market/presentation/market_providers.dart';
 import 'package:ramala/template.dart';
 import 'package:intl/intl.dart';
+import 'package:ramala/features/notification/presentation/notification_page.dart';
 
 class MarketListPage extends ConsumerStatefulWidget {
   const MarketListPage({super.key});
@@ -31,6 +32,7 @@ class _MarketListPageState extends ConsumerState<MarketListPage> {
     final async = ref.watch(marketListProvider(_q));
     return AppScaffold(
       title: 'Pasar',
+      actions: const [NotifBell()],
       onRefresh: _refresh,
       children: [
         AppSearchBar(

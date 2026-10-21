@@ -11,6 +11,7 @@ import 'package:ramala/features/profile/data/cloudinary_service.dart';
 import 'package:ramala/features/profile/data/profile_repository.dart';
 import 'package:ramala/features/profile/presentation/profile_providers.dart';
 import 'package:ramala/template.dart';
+import 'package:go_router/go_router.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -212,6 +213,22 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         onTap: _toggleBio,
                       ),
                     ],
+                    // ===== sisipkan di sini =====
+                    const Divider(),
+                    AppListTile(
+                      icon: Icons.link,
+                      title: 'Ledger blockchain',
+                      onTap: () => context.push('/ledger'),
+                    ),
+                    if (p.role == 'admin') ...[
+                      const Divider(),
+                      AppListTile(
+                        icon: Icons.admin_panel_settings_outlined,
+                        title: 'Panel admin',
+                        onTap: () => context.push('/admin'),
+                      ),
+                    ],
+                    // ===== akhir sisipan =====
                     const Divider(),
                     AppListTile(
                       icon: Icons.logout,

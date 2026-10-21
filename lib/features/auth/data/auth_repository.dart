@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:ramala/core/storage/local_db.dart';
+import 'package:ramala/features/notification/data/notification_service.dart';
 
 class AuthRepository {
   GoTrueClient get _auth => Supabase.instance.client.auth;
@@ -11,6 +12,7 @@ class AuthRepository {
       .signUp(email: email, password: password, data: {'username': username});
 
   Future<void> logout() async {
+    await NotificationService.stopBackground();
     await _auth.signOut();
     await LocalDb.clear();
   }
