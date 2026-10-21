@@ -10,6 +10,9 @@ import 'package:ramala/shell/main_shell.dart';
 import 'package:ramala/shell/placeholder_page.dart';
 import 'package:ramala/features/feedback/presentation/feedback_page.dart';
 import 'package:ramala/features/profile/presentation/profile_page.dart';
+import 'package:ramala/features/market/presentation/market_detail_page.dart';
+import 'package:ramala/features/market/presentation/market_list_page.dart';
+import 'package:ramala/features/portfolio/presentation/portfolio_page.dart';
 
 /// Memicu ulang redirect saat status login berubah
 class _AuthRefresh extends ChangeNotifier {
@@ -45,6 +48,10 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(path: '/login', builder: (_, __) => const LoginPage()),
       GoRoute(path: '/register', builder: (_, __) => const RegisterPage()),
+      GoRoute(
+        path: '/market/:id',
+        builder: (_, s) => MarketDetailPage(s.pathParameters['id']!),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (_, __, shell) => MainShell(shell),
         branches: [
@@ -52,7 +59,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/pasar',
-                builder: (_, __) => const PlaceholderPage('Pasar'),
+                builder: (_, __) => const MarketListPage(),
               ),
             ],
           ),
@@ -60,7 +67,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/portofolio',
-                builder: (_, __) => const PlaceholderPage('Portofolio'),
+                builder: (_, __) => const PortfolioPage(),
               ),
             ],
           ),
