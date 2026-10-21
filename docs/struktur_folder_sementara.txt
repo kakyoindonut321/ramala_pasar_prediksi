@@ -1,0 +1,109 @@
+lib/
+├── app.dart
+├── main.dart
+├── template.dart
+├── core/
+│   ├── config/
+│   │   └── env.dart
+│   ├── error/
+│   │   └── app_error.dart
+│   ├── network/
+│   │   └── .gitkeep
+│   ├── router/
+│   │   └── app_router.dart
+│   ├── storage/
+│   │   ├── local_db.dart
+│   │   └── secure_session.dart
+│   ├── theme/
+│   │   └── .gitkeep
+│   ├── utils/
+│   │   └── .gitkeep
+│   ├── validators/
+│   │   └── validators.dart
+│   └── widgets/
+│       ├── input_sheet.dart
+│       └── state loading/
+│           └── error/
+│               └── empty/
+│                   └── .gitkeep
+├── features/
+│   ├── admin/
+│   │   └── presentation/
+│   │       └── admin_page.dart
+│   ├── auth/
+│   │   ├── data/
+│   │   │   ├── auth_repository.dart
+│   │   │   └── biometric_service.dart
+│   │   └── presentation/
+│   │       ├── login_page.dart
+│   │       └── register_page.dart
+│   ├── chatbot/
+│   │   ├── data/
+│   │   │   └── gemini_service.dart
+│   │   └── presentation/
+│   │       └── chat_page.dart
+│   ├── contoh_struktur/
+│   │   ├── data/
+│   │   │   └── .gitkeep
+│   │   ├── domain/
+│   │   │   └── .gitkeep
+│   │   └── presentation/
+│   │       └── .gitkeep
+│   ├── converter/
+│   │   ├── data/
+│   │   │   └── rates_repository.dart
+│   │   └── presentation/
+│   │       └── converter_page.dart
+│   ├── feedback/
+│   │   └── presentation/
+│   │       └── feedback_page.dart
+│   ├── game/
+│   │   └── presentation/
+│   │       └── game_page.dart
+│   ├── ledger/
+│   │   └── presentation/
+│   │       └── ledger_page.dart
+│   ├── market/
+│   │   ├── data/
+│   │   │   └── market_repository.dart
+│   │   ├── domain/
+│   │   │   ├── lmsr.dart
+│   │   │   └── market.dart
+│   │   └── presentation/
+│   │       ├── market_detail_page.dart
+│   │       ├── market_list_page.dart
+│   │       ├── market_providers.dart
+│   │       └── trade_sheet.dart
+│   ├── nearby/
+│   │   └── presentation/
+│   │       └── nearby_page.dart
+│   ├── notification/
+│   │   ├── data/
+│   │   │   ├── background_worker.dart
+│   │   │   ├── notification_repository.dart
+│   │   │   └── notification_service.dart
+│   │   ├── domain/
+│   │   │   └── app_notification.dart
+│   │   └── presentation/
+│   │       └── notification_page.dart
+│   ├── portfolio/
+│   │   ├── data/
+│   │   │   └── portfolio_repository.dart
+│   │   └── presentation/
+│   │       ├── portfolio_page.dart
+│   │       └── portfolio_providers.dart
+│   ├── profile/
+│   │   ├── data/
+│   │   │   ├── cloudinary_service.dart
+│   │   │   └── profile_repository.dart
+│   │   └── presentation/
+│   │       ├── profile_page.dart
+│   │       └── profile_providers.dart
+│   ├── trading/
+│   │   └── .gitkeep
+│   └── wallet/
+│       └── .gitkeep
+└── shell/
+    ├── features_page.dart
+    ├── main_shell.dart
+    └── placeholder_page.dart

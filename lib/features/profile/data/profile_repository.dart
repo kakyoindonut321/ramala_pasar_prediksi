@@ -22,7 +22,12 @@ class Profile {
 
 class ProfileRepository {
   SupabaseClient get _db => Supabase.instance.client;
-  String get _uid => _db.auth.currentUser!.id;
+  // String get _uid => _db.auth.currentUser!.id;
+  String get _uid {
+    final u = _db.auth.currentUser;
+    if (u == null) throw const AuthException('not_authenticated');
+    return u.id;
+  }
 
   Future<Profile> me() async => Profile.fromMap(
     await _db.from('profiles').select().eq('id', _uid).single(),

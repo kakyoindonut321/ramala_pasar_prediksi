@@ -134,9 +134,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       confirmLabel: 'Keluar',
       danger: true,
     );
-    if (!ok) return;
+    if (!ok || !mounted) return;
+    final router = GoRouter.of(context);
     try {
       await AuthRepository().logout();
+      router.go('/login');
     } catch (e) {
       _toast(AppError.message(e));
     }

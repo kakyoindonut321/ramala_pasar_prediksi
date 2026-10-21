@@ -3,7 +3,7 @@ import 'package:ramala/core/config/env.dart';
 
 class GeminiService {
   static const _model =
-      'gemini-2.5-flash'; // ganti jika model sudah dipensiunkan
+      'gemini-3.8-flash'; // ganti jika model sudah dipensiunkan
   static final _dio = Dio(
     BaseOptions(
       connectTimeout: const Duration(seconds: 15),

@@ -6,6 +6,8 @@ import 'package:ramala/core/validators/validators.dart';
 import 'package:ramala/features/chatbot/data/gemini_service.dart';
 import 'package:ramala/features/market/presentation/market_providers.dart';
 import 'package:ramala/template.dart';
+import 'package:flutter/foundation.dart';
+import 'package:dio/dio.dart';
 
 class _Msg {
   const _Msg(this.role, this.text);
@@ -82,7 +84,9 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       ], ctx);
       await LocalDb.addChat('model', reply);
       if (mounted) setState(() => _msgs.add(_Msg('model', reply)));
-    } catch (e) {
+    } catch (e, st) {
+      debugPrint('CHAT ERROR: $e\n$st');
+      if (e is DioException) debugPrint('DIO BODY: ${e.response?.data}');
       _toast(
         e is FormatException
             ? 'API key Gemini belum diatur.'

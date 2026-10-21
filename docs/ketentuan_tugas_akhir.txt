@@ -1,0 +1,26 @@
+Pemrograman Aplikasi Mobile / Teknologi & Pemrograman Mobile
+Tugas Akhir
+ 
+    Projek dikerjakan dengan bahasa pemrograman yang mendukung teknologi dan komunikasi secara mobile
+ 
+    Projek dibuat menggunakan kriteria:
+    ✓ Memiliki konsep projek akhir
+    ✓ Terdapat login dengan enkripsi (tidak menggunakan firebase) dan session
+    ✓ Memiliki login biometric
+    ✓ Terkoneksi database / penyimpanan lokal dan online (SQLite/ Hive/dll)
+    ✓ Terdapat web service / API boleh sampai pemanfaatan IoT, games atau multiplatform (Android, iOS) serta memiliki fasilitas LBS yang terkait tema
+    ✓ Terdapat menu button navigation: menu profil (ada gambar) dan menu saran dan kesan mata kuliah Pemrograman Aplikasi Mobile dan menu logout
+    ✓ Memiliki menu tambahan konversi mata uang (min. 3 mata uang) dan konversi waktu (minimal ada: WB, WIT, WITA, London) yang terpadukan dengan konsep
+    ✓ Memiliki fitur minimal 2 sensor (Accelerometer, Gyroscope, dll) sesuai konsep
+    ✓ Memiliki fitur/fasilitas AI dan fitur LLM sesuai dengan konsep tema
+    ✓ Memiliki fitur mini games sederhana terkait dengan konsep
+    ✓ Memiliki fasilitas pencarian dan pemilihan
+    ✓ Memiliki fitur notifikasi berbasis mobile sesuai dengan konsep
+    ✓ Memiliki fitur blockchain sederhana
+ 
+    Projek dipresentasikan tiap minggu setelah UTS
+ 
+    Projek dibuat laporan pembuatan projek sekaligus penjelasan source code
+ 
+    Laporan terdiri dari cover, halaman pengesahan, daftar isi, landasan teori dan tema aplikasi, perancangan (RBPL/RPL), Implementasi dan penjelasan source code detail disertai screen shoot dan lembar evaluasi pengujian perangkat lunak
+(tidak harus semua langsung, banyak yang akan dikerjakan secara manual tanpa perlu generate)

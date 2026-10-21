@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AppError {
@@ -40,7 +41,25 @@ class AppError {
               ? 'Data sudah dipakai.'
               : 'Terjadi kesalahan pada server.');
     }
-    // if (e is DioException) return 'Gagal terhubung ke layanan. Coba lagi.';
+    if (e is DioException) {
+      switch (e.response?.statusCode) {
+        case 503:
+          return 'Layanan AI sedang sibuk. Coba lagi beberapa saat lagi.';
+        case 429:
+          return 'Kuota layanan habis atau terlalu banyak permintaan. Coba lagi nanti.';
+        case 400:
+        case 401:
+        case 403:
+        case 404:
+          return 'Layanan tidak dapat diakses. Periksa konfigurasi API.';
+      }
+      if (e.type == DioExceptionType.connectionError ||
+          e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        return 'Tidak ada koneksi atau layanan lambat merespons.';
+      }
+      return 'Gagal terhubung ke layanan. Coba lagi.';
+    }
     return 'Terjadi kesalahan. Coba lagi.';
   }
 }
