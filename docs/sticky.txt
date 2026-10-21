@@ -1,9 +1,0 @@
-Tambahan kecil
-env.json dan folder sensitif masukkan ke .gitignore.
-workmanager dan flutter_local_notifications butuh sedikit konfigurasi Android nanti (AndroidManifest.xml, minSdk). Saya jabarkan saat masuk fitur notifikasi.
-local_auth butuh MainActivity extend FlutterFragmentActivity dan izin USE_BIOMETRIC. Saya jabarkan saat masuk fitur auth.
-
-flutter pub add flutter_riverpod go_router supabase_flutter flutter_secure_storage local_auth sqflite path dio image_picker flutter_image_compress cached_network_image crypto fl_chart sensors_plus flutter_local_notifications workmanager geolocator flutter_map latlong2 intl timezone permission_handler
-rname = 'usernamemu';
-
-password user forbiddenikki@gmail.com: admin123456789
