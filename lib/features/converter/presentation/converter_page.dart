@@ -207,8 +207,18 @@ class _ConverterPageState extends ConsumerState<ConverterPage> {
 
   Future<void> _pickMarket() async {
     try {
-      final list = await ref.read(marketListProvider('').future);
+      final list = (await ref.read(marketListProvider('').future))
+          .where((m) => m.isOpen) // BARU: sembunyikan market tutup/selesai
+          .toList();
       if (!mounted) return;
+      if (list.isEmpty) {
+        AppToast.show(
+          context,
+          'Tidak ada market yang masih terbuka.',
+          type: ToastType.info,
+        );
+        return;
+      }
       final m = await AppBottomSheet.show<Market>(
         context,
         title: 'Pilih market',
@@ -228,8 +238,9 @@ class _ConverterPageState extends ConsumerState<ConverterPage> {
       );
       if (m != null) setState(() => _at = m.closeAt.toLocal());
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         AppToast.show(context, AppError.message(e), type: ToastType.error);
+      }
     }
   }
 

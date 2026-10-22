@@ -215,7 +215,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         onTap: _toggleBio,
                       ),
                     ],
-                    // ===== sisipkan di sini =====
+                    const Divider(),
+                    AppListTile(
+                      icon: Icons.add_card_outlined,
+                      title: 'Top up koin',
+                      onTap: () => context.push('/topup'),
+                    ),
                     const Divider(),
                     AppListTile(
                       icon: Icons.link,

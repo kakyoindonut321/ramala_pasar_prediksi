@@ -6,8 +6,8 @@ import 'package:ramala/core/validators/validators.dart';
 import 'package:ramala/features/chatbot/data/gemini_service.dart';
 import 'package:ramala/features/market/presentation/market_providers.dart';
 import 'package:ramala/template.dart';
-import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
+import 'package:ramala/features/chatbot/data/ai_chat_service.dart';
 
 class _Msg {
   const _Msg(this.role, this.text);
@@ -56,6 +56,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   Future<void> _send() async {
     final text = Validators.clean(_c.text);
     if (text.isEmpty || _sending) return;
+    if (text.length > 1000)
+      return _toast('Pesan maksimal 1000 karakter.'); // BARU
     final now = DateTime.now();
     _times.removeWhere((t) => now.difference(t) > const Duration(minutes: 10));
     if (_times.length >= 15)
@@ -79,7 +81,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       while (h.isNotEmpty && h.first.role != 'user') {
         h.removeAt(0);
       }
-      final reply = await GeminiService().ask([
+      final reply = await AiChatService().ask([
+        // GANTI dari GeminiService
         for (final m in h) {'role': m.role, 'text': m.text},
       ], ctx);
       await LocalDb.addChat('model', reply);
@@ -89,7 +92,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       if (e is DioException) debugPrint('DIO BODY: ${e.response?.data}');
       _toast(
         e is FormatException
-            ? 'API key Gemini belum diatur.'
+            ? 'API key AI belum diatur.' // GANTI teks
             : AppError.message(e),
       );
     } finally {

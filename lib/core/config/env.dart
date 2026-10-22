@@ -8,4 +8,6 @@ class Env {
     'CLOUDINARY_UPLOAD_PRESET',
   );
   static const geminiKey = String.fromEnvironment('GEMINI_API_KEY');
+
+  static const groqKey = String.fromEnvironment('GROQ_API_KEY');
 }
