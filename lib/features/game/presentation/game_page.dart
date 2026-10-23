@@ -45,6 +45,7 @@ class _GamePageState extends ConsumerState<GamePage> {
   final _random = Random();
   final _subscriptions = <StreamSubscription>[];
   final _money = <_MoneyDrop>[];
+  final _maxTilt = 0.6; // ~26°, sebelumnya 0.75
   Timer? _gameTimer;
   bool _playing = false;
   bool _done = false;
@@ -119,7 +120,8 @@ class _GamePageState extends ConsumerState<GamePage> {
 
   void _onAccelerometer(AccelerometerEvent event) {
     if (!_playing) return;
-    _accelerometerAngle = atan2(event.x, event.z);
+    // tanda dibalik agar searah dengan gyro y (miring kanan = positif)
+    _accelerometerAngle = atan2(-event.x, event.z);
   }
 
   void _onGyroscope(GyroscopeEvent event) {
@@ -132,14 +134,17 @@ class _GamePageState extends ConsumerState<GamePage> {
 
     final delta = elapsed.clamp(0.0, 0.1);
     _tiltAngle =
-        (0.98 * (_tiltAngle + event.y * delta) + 0.02 * _accelerometerAngle)
-            .clamp(-0.75, 0.75);
+        (0.92 * (_tiltAngle + event.y * delta) + 0.08 * _accelerometerAngle)
+            .clamp(-_maxTilt, _maxTilt);
     final basketMargin = _fieldWidth > _basketWidth
         ? _basketWidth / (2 * _fieldWidth) + 0.02
         : 0.15;
-    _targetBasketX = (0.5 - (_tiltAngle / 0.75) * 0.44)
+
+    final tilt = _tiltAngle.abs() < 0.04 ? 0.0 : _tiltAngle;
+    _targetBasketX = (0.5 + (tilt / _maxTilt) * 0.5)
         .clamp(basketMargin, 1 - basketMargin)
         .toDouble();
+    debugPrint('$_tiltAngle $_accelerometerAngle');
   }
 
   void _handleSensorError(Object error) {
@@ -177,7 +182,8 @@ class _GamePageState extends ConsumerState<GamePage> {
       );
     }
 
-    _basketX += (_targetBasketX - _basketX) * 0.16;
+    _basketX +=
+        (_targetBasketX - _basketX) * (1 - exp(-elapsed / 0.05)); // perubahan
     var collected = 0;
     final basketTop = _fieldHeight - 72;
     _money.removeWhere((drop) {

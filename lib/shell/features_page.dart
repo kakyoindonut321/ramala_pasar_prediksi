@@ -15,7 +15,7 @@ class FeaturesPage extends StatelessWidget {
         '/konverter',
       ),
       (Icons.near_me_outlined, 'Market terdekat', 'Peta dan lokasi', '/nearby'),
-      (Icons.sports_esports_outlined, 'Tebak Arah', 'Game sensor', '/game'),
+      (Icons.sports_esports_outlined, 'Tangkap Uang', 'Game sensor', '/game'),
       (Icons.smart_toy_outlined, 'Ramala AI', 'Chatbot Gemini', '/chatbot'),
       (Icons.link, 'Ledger blockchain', 'Catatan transaksi', '/ledger'),
     ];
