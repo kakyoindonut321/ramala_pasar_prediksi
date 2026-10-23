@@ -18,3 +18,14 @@ final priceHistoryProvider = FutureProvider.autoDispose
       (ref, id) => MarketRepository().history(id),
       retry: (_, __) => null,
     );
+
+final marketPageProvider = FutureProvider.autoDispose
+    .family<List<Market>, MarketQuery>(
+      (ref, q) => MarketRepository().page(q),
+      retry: (_, __) => null,
+    );
+
+final categoriesProvider = FutureProvider.autoDispose<List<String>>(
+  (ref) => MarketRepository().categories(),
+  retry: (_, __) => null,
+);

@@ -3,13 +3,17 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ramala/features/admin/presentation/admin_create_market_page.dart';
 import 'package:ramala/features/admin/presentation/admin_page.dart';
+import 'package:ramala/features/admin/presentation/admin_resolve_page.dart';
+import 'package:ramala/features/admin/presentation/admin_topup_page.dart';
 import 'package:ramala/features/chatbot/presentation/chat_page.dart';
 import 'package:ramala/features/converter/presentation/converter_page.dart';
 import 'package:ramala/features/game/presentation/game_page.dart';
 import 'package:ramala/features/ledger/presentation/ledger_page.dart';
 import 'package:ramala/features/nearby/presentation/nearby_page.dart';
 import 'package:ramala/features/notification/presentation/notification_page.dart';
+import 'package:ramala/features/topup/presentation/topup_page.dart';
 import 'package:ramala/shell/features_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:ramala/features/auth/presentation/login_page.dart';
@@ -69,7 +73,22 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, __) => const NotificationPage(),
       ),
       GoRoute(path: '/ledger', builder: (_, __) => const LedgerPage()),
-      GoRoute(path: '/admin', builder: (_, __) => const AdminPage()),
+      GoRoute(
+        path: '/admin',
+        builder: (_, __) => const AdminPage(),
+        routes: [
+          GoRoute(
+            path: 'market-baru',
+            builder: (_, __) => const AdminCreateMarketPage(),
+          ),
+          GoRoute(path: 'topup', builder: (_, __) => const AdminTopupPage()),
+          GoRoute(
+            path: 'selesaikan',
+            builder: (_, __) => const AdminResolvePage(),
+          ),
+        ],
+      ),
+      GoRoute(path: '/topup', builder: (_, __) => const TopupPage()),
       StatefulShellRoute.indexedStack(
         builder: (_, __, shell) => MainShell(shell),
         branches: [

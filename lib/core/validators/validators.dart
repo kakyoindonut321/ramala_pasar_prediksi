@@ -59,4 +59,14 @@ class Validators {
   /// Escape wildcard untuk ilike
   static String likeEscape(String s) =>
       s.replaceAll(r'\', r'\\').replaceAll('%', r'\%').replaceAll('_', r'\_');
+
+  /// Angka koin top up: bilangan bulat 1..1.000.000
+  static String? topupAmount(String? v) {
+    final s = clean(v ?? '');
+    if (s.isEmpty) return 'Jumlah wajib diisi';
+    final n = int.tryParse(s);
+    if (n == null) return 'Masukkan angka bulat';
+    if (n < 1 || n > 1000000) return 'Jumlah 1 sampai 1.000.000 koin';
+    return null;
+  }
 }

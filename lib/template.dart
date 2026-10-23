@@ -54,28 +54,49 @@ class AppColors {
   static const textMuted = Color(0xFF6E617E); // placeholder, disabled
 
   /// Glow tipis pengganti elevasi.
-  static List<BoxShadow> glow([Color c = primary]) =>
-      [BoxShadow(color: c.withValues(alpha: .28), blurRadius: 18)];
+  static List<BoxShadow> glow([Color c = primary]) => [
+    BoxShadow(color: c.withValues(alpha: .28), blurRadius: 18),
+  ];
 }
 
 /// Tipografi. Cinzel = judul/logo, Inter = isi. Angka selalu tabular.
 class AppText {
   static const _tab = [FontFeature.tabularFigures()];
-  static TextStyle _inter(double s, FontWeight w, Color c, {bool tab = false}) =>
-      GoogleFonts.inter(
-          fontSize: s, fontWeight: w, color: c, height: 1.35, fontFeatures: tab ? _tab : null);
+  static TextStyle _inter(
+    double s,
+    FontWeight w,
+    Color c, {
+    bool tab = false,
+  }) => GoogleFonts.inter(
+    fontSize: s,
+    fontWeight: w,
+    color: c,
+    height: 1.35,
+    fontFeatures: tab ? _tab : null,
+  );
   static TextStyle _cinzel(double s, FontWeight w) => GoogleFonts.cinzel(
-      fontSize: s, fontWeight: w, color: AppColors.text, letterSpacing: 1.2);
+    fontSize: s,
+    fontWeight: w,
+    color: AppColors.text,
+    letterSpacing: 1.2,
+  );
 
   static TextStyle get display => _cinzel(28, FontWeight.w700); // logo, hero
-  static TextStyle get title => _cinzel(20, FontWeight.w700); // judul halaman/dialog
-  static TextStyle get heading => _inter(16, FontWeight.w600, AppColors.text); // judul kartu/seksi
+  static TextStyle get title =>
+      _cinzel(20, FontWeight.w700); // judul halaman/dialog
+  static TextStyle get heading =>
+      _inter(16, FontWeight.w600, AppColors.text); // judul kartu/seksi
   static TextStyle get body => _inter(14, FontWeight.w400, AppColors.text);
-  static TextStyle get bodyDim => _inter(14, FontWeight.w400, AppColors.textDim);
-  static TextStyle get label => _inter(13, FontWeight.w600, AppColors.text); // tombol, chip
-  static TextStyle get caption => _inter(12, FontWeight.w400, AppColors.textDim);
-  static TextStyle get number => _inter(22, FontWeight.w700, AppColors.text, tab: true);
-  static TextStyle get numberSm => _inter(14, FontWeight.w600, AppColors.text, tab: true);
+  static TextStyle get bodyDim =>
+      _inter(14, FontWeight.w400, AppColors.textDim);
+  static TextStyle get label =>
+      _inter(13, FontWeight.w600, AppColors.text); // tombol, chip
+  static TextStyle get caption =>
+      _inter(12, FontWeight.w400, AppColors.textDim);
+  static TextStyle get number =>
+      _inter(22, FontWeight.w700, AppColors.text, tab: true);
+  static TextStyle get numberSm =>
+      _inter(14, FontWeight.w600, AppColors.text, tab: true);
 }
 
 /// Skala spasi.
@@ -128,8 +149,14 @@ class AppTheme {
       ),
       textTheme: GoogleFonts.interTextTheme(base.textTheme)
           .apply(bodyColor: AppColors.text, displayColor: AppColors.text),
-      dividerTheme: const DividerThemeData(color: AppColors.border, thickness: 1, space: 1),
-      progressIndicatorTheme: const ProgressIndicatorThemeData(color: AppColors.primary),
+      dividerTheme: const DividerThemeData(
+        color: AppColors.border,
+        thickness: 1,
+        space: 1,
+      ),
+      progressIndicatorTheme: const ProgressIndicatorThemeData(
+        color: AppColors.primary,
+      ),
       textSelectionTheme: TextSelectionThemeData(
         cursorColor: AppColors.primary,
         selectionColor: AppColors.primary.withValues(alpha: .3),
@@ -139,7 +166,9 @@ class AppTheme {
         backgroundColor: AppColors.surface,
         modalBackgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(AppRadius.xl),
+          ),
           side: BorderSide(color: AppColors.border),
         ),
       ),
@@ -147,10 +176,20 @@ class AppTheme {
         backgroundColor: AppColors.surface,
         height: 66,
         indicatorColor: AppColors.primary.withValues(alpha: .18),
-        labelTextStyle: WidgetStateProperty.resolveWith((s) => AppText.caption.copyWith(
-            color: s.contains(WidgetState.selected) ? AppColors.primary : AppColors.textDim)),
-        iconTheme: WidgetStateProperty.resolveWith((s) => IconThemeData(
-            color: s.contains(WidgetState.selected) ? AppColors.primary : AppColors.textDim)),
+        labelTextStyle: WidgetStateProperty.resolveWith(
+          (s) => AppText.caption.copyWith(
+            color: s.contains(WidgetState.selected)
+                ? AppColors.primary
+                : AppColors.textDim,
+          ),
+        ),
+        iconTheme: WidgetStateProperty.resolveWith(
+          (s) => IconThemeData(
+            color: s.contains(WidgetState.selected)
+                ? AppColors.primary
+                : AppColors.textDim,
+          ),
+        ),
       ),
     );
   }
@@ -158,9 +197,16 @@ class AppTheme {
 
 /// Dekorasi input seragam (dipakai AppTextField & AppSearchBar).
 class AppInput {
-  static InputDecoration decoration({String? label, String? hint, IconData? icon, Widget? suffix}) {
+  static InputDecoration decoration({
+    String? label,
+    String? hint,
+    IconData? icon,
+    Widget? suffix,
+  }) {
     OutlineInputBorder b(Color c, [double w = 1]) => OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppRadius.md), borderSide: BorderSide(color: c, width: w));
+      borderRadius: BorderRadius.circular(AppRadius.md),
+      borderSide: BorderSide(color: c, width: w),
+    );
     return InputDecoration(
       labelText: label,
       hintText: hint,
@@ -174,7 +220,10 @@ class AppInput {
       hintStyle: AppText.bodyDim.copyWith(color: AppColors.textMuted),
       errorStyle: AppText.caption.copyWith(color: AppColors.no),
       counterStyle: AppText.caption,
-      contentPadding: const EdgeInsets.symmetric(horizontal: AppSpace.lg, vertical: 14),
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: AppSpace.lg,
+        vertical: 14,
+      ),
       border: b(AppColors.border),
       enabledBorder: b(AppColors.border),
       focusedBorder: b(AppColors.primary, 1.5),
@@ -212,7 +261,8 @@ class AppScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget content = body ??
+    Widget content =
+        body ??
         ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.all(AppSpace.lg),
@@ -220,18 +270,20 @@ class AppScaffold extends StatelessWidget {
         );
     if (onRefresh != null && body == null) {
       content = RefreshIndicator(
-          color: AppColors.primary,
-          backgroundColor: AppColors.card,
-          onRefresh: onRefresh!,
-          child: content);
+        color: AppColors.primary,
+        backgroundColor: AppColors.card,
+        onRefresh: onRefresh!,
+        child: content,
+      );
     }
     return Container(
       decoration: const BoxDecoration(
         gradient: RadialGradient(
-            center: Alignment(0, -1.1),
-            radius: 1.3,
-            colors: [Color(0xFF2A1238), AppColors.bg],
-            stops: [0, .75]),
+          center: Alignment(0, -1.1),
+          radius: 1.3,
+          colors: [Color(0xFF2A1238), AppColors.bg],
+          stops: [0, .75],
+        ),
       ),
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -243,10 +295,15 @@ class AppScaffold extends StatelessWidget {
                 scrolledUnderElevation: 0,
                 centerTitle: true,
                 title: Text(title!, style: AppText.title),
-                actions: actions),
+                actions: actions,
+              ),
         floatingActionButton: fab,
         bottomNavigationBar: bottomNav,
-        body: SafeArea(top: title == null, bottom: bottomNav == null, child: content),
+        body: SafeArea(
+          top: title == null,
+          bottom: bottomNav == null,
+          child: content,
+        ),
       ),
     );
   }
@@ -261,24 +318,34 @@ class AppNavItem {
 
 /// Bottom navigation (gaya dari NavigationBarTheme). Maks 5 item.
 class AppBottomNav extends StatelessWidget {
-  const AppBottomNav({super.key, required this.items, required this.current, required this.onTap});
+  const AppBottomNav({
+    super.key,
+    required this.items,
+    required this.current,
+    required this.onTap,
+  });
   final List<AppNavItem> items;
   final int current;
   final ValueChanged<int> onTap;
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
-        decoration: const BoxDecoration(border: Border(top: BorderSide(color: AppColors.border))),
-        child: NavigationBar(
-          selectedIndex: current,
-          onDestinationSelected: onTap,
-          destinations: [
-            for (final i in items)
-              NavigationDestination(
-                  icon: Icon(i.icon), selectedIcon: Icon(i.activeIcon ?? i.icon), label: i.label),
-          ],
-        ),
-      );
+    decoration: const BoxDecoration(
+      border: Border(top: BorderSide(color: AppColors.border)),
+    ),
+    child: NavigationBar(
+      selectedIndex: current,
+      onDestinationSelected: onTap,
+      destinations: [
+        for (final i in items)
+          NavigationDestination(
+            icon: Icon(i.icon),
+            selectedIcon: Icon(i.activeIcon ?? i.icon),
+            label: i.label,
+          ),
+      ],
+    ),
+  );
 }
 
 /// Logo dari assets/gambar/logo_ramala.png (fallback ikon jika aset belum ada).
@@ -288,16 +355,24 @@ class AppLogo extends StatelessWidget {
   final bool showName;
 
   @override
-  Widget build(BuildContext context) => Column(mainAxisSize: MainAxisSize.min, children: [
-        Image.asset('assets/gambar/logo_ramala.png',
-            height: size,
-            errorBuilder: (_, __, ___) =>
-                Icon(Icons.auto_awesome, size: size * .6, color: AppColors.primary)),
-        if (showName) ...[
-          const Gap(AppSpace.sm),
-          Text('RAMALA', style: AppText.display.copyWith(color: AppColors.primary)),
-        ],
-      ]);
+  Widget build(BuildContext context) => Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Image.asset(
+        'assets/gambar/logo_ramala.png',
+        height: size,
+        errorBuilder: (_, __, ___) =>
+            Icon(Icons.auto_awesome, size: size * .6, color: AppColors.primary),
+      ),
+      if (showName) ...[
+        const Gap(AppSpace.sm),
+        Text(
+          'RAMALA',
+          style: AppText.display.copyWith(color: AppColors.primary),
+        ),
+      ],
+    ],
+  );
 }
 
 // ============================================================================
@@ -327,19 +402,44 @@ class AppButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final enabled = onPressed != null && !loading;
     final (bg, fg, border) = switch (variant) {
-      AppButtonVariant.primary => (AppColors.primary, AppColors.onPrimary, AppColors.primary),
-      AppButtonVariant.secondary => (AppColors.card, AppColors.text, AppColors.border),
-      AppButtonVariant.ghost => (Colors.transparent, AppColors.primary, Colors.transparent),
-      AppButtonVariant.danger => (AppColors.no.withValues(alpha: .15), AppColors.no, AppColors.no),
+      AppButtonVariant.primary => (
+        AppColors.primary,
+        AppColors.onPrimary,
+        AppColors.primary,
+      ),
+      AppButtonVariant.secondary => (
+        AppColors.card,
+        AppColors.text,
+        AppColors.border,
+      ),
+      AppButtonVariant.ghost => (
+        Colors.transparent,
+        AppColors.primary,
+        Colors.transparent,
+      ),
+      AppButtonVariant.danger => (
+        AppColors.no.withValues(alpha: .15),
+        AppColors.no,
+        AppColors.no,
+      ),
     };
     final r = BorderRadius.circular(AppRadius.md);
     final content = loading
         ? SizedBox(
-            width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: fg))
-        : Row(mainAxisSize: MainAxisSize.min, children: [
-            if (icon != null) ...[Icon(icon, size: 18, color: fg), const SizedBox(width: AppSpace.sm)],
-            Text(label, style: AppText.label.copyWith(color: fg)),
-          ]);
+            width: 18,
+            height: 18,
+            child: CircularProgressIndicator(strokeWidth: 2, color: fg),
+          )
+        : Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (icon != null) ...[
+                Icon(icon, size: 18, color: fg),
+                const SizedBox(width: AppSpace.sm),
+              ],
+              Text(label, style: AppText.label.copyWith(color: fg)),
+            ],
+          );
     return Opacity(
       opacity: enabled || loading ? 1 : .45,
       child: SizedBox(
@@ -347,18 +447,27 @@ class AppButton extends StatelessWidget {
         height: 48,
         child: DecoratedBox(
           decoration: BoxDecoration(
-              borderRadius: r,
-              boxShadow: variant == AppButtonVariant.primary && enabled ? AppColors.glow() : null),
+            borderRadius: r,
+            boxShadow: variant == AppButtonVariant.primary && enabled
+                ? AppColors.glow()
+                : null,
+          ),
           child: Material(
             color: bg,
             clipBehavior: Clip.antiAlias,
-            shape: RoundedRectangleBorder(borderRadius: r, side: BorderSide(color: border)),
+            shape: RoundedRectangleBorder(
+              borderRadius: r,
+              side: BorderSide(color: border),
+            ),
             child: InkWell(
               onTap: enabled ? onPressed : null,
               child: Center(
-                  widthFactor: expanded ? null : 1,
-                  child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: AppSpace.xl), child: content)),
+                widthFactor: expanded ? null : 1,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpace.xl),
+                  child: content,
+                ),
+              ),
             ),
           ),
         ),
@@ -408,34 +517,43 @@ class _AppTextFieldState extends State<AppTextField> {
 
   @override
   Widget build(BuildContext context) => TextFormField(
-        controller: widget.controller,
-        enabled: widget.enabled,
-        obscureText: widget.password && _hide,
-        keyboardType: widget.keyboardType,
-        maxLength: widget.maxLength,
-        maxLines: widget.password ? 1 : widget.maxLines,
-        inputFormatters: widget.formatters,
-        onChanged: widget.onChanged,
-        textInputAction: widget.action,
-        validator: widget.validator,
-        autovalidateMode: AutovalidateMode.onUserInteraction,
-        style: AppText.body,
-        decoration: AppInput.decoration(
-          label: widget.label,
-          hint: widget.hint,
-          icon: widget.icon,
-          suffix: widget.password
-              ? IconButton(
-                  icon: Icon(_hide ? Icons.visibility_off_outlined : Icons.visibility_outlined),
-                  onPressed: () => setState(() => _hide = !_hide))
-              : null,
-        ),
-      );
+    controller: widget.controller,
+    enabled: widget.enabled,
+    obscureText: widget.password && _hide,
+    keyboardType: widget.keyboardType,
+    maxLength: widget.maxLength,
+    maxLines: widget.password ? 1 : widget.maxLines,
+    inputFormatters: widget.formatters,
+    onChanged: widget.onChanged,
+    textInputAction: widget.action,
+    validator: widget.validator,
+    autovalidateMode: AutovalidateMode.onUserInteraction,
+    style: AppText.body,
+    decoration: AppInput.decoration(
+      label: widget.label,
+      hint: widget.hint,
+      icon: widget.icon,
+      suffix: widget.password
+          ? IconButton(
+              icon: Icon(
+                _hide
+                    ? Icons.visibility_off_outlined
+                    : Icons.visibility_outlined,
+              ),
+              onPressed: () => setState(() => _hide = !_hide),
+            )
+          : null,
+    ),
+  );
 }
 
 /// Pencarian dengan debounce 400 ms (hemat query). `onSearch` menerima teks yang sudah dirapikan.
 class AppSearchBar extends StatefulWidget {
-  const AppSearchBar({super.key, required this.onSearch, this.hint = 'Cari market...'});
+  const AppSearchBar({
+    super.key,
+    required this.onSearch,
+    this.hint = 'Cari market...',
+  });
   final ValueChanged<String> onSearch;
   final String hint;
 
@@ -450,7 +568,10 @@ class _AppSearchBarState extends State<AppSearchBar> {
   void _changed(String v) {
     setState(() {});
     _t?.cancel();
-    _t = Timer(const Duration(milliseconds: 400), () => widget.onSearch(v.trim()));
+    _t = Timer(
+      const Duration(milliseconds: 400),
+      () => widget.onSearch(v.trim()),
+    );
   }
 
   @override
@@ -462,52 +583,73 @@ class _AppSearchBarState extends State<AppSearchBar> {
 
   @override
   Widget build(BuildContext context) => TextField(
-        controller: _c,
-        onChanged: _changed,
-        maxLength: 60,
-        style: AppText.body,
-        textInputAction: TextInputAction.search,
-        decoration: AppInput.decoration(
-          hint: widget.hint,
-          icon: Icons.search_rounded,
-          suffix: _c.text.isEmpty
-              ? null
-              : IconButton(
-                  icon: const Icon(Icons.close_rounded),
-                  onPressed: () {
-                    _c.clear();
-                    _changed('');
-                  }),
-        ).copyWith(counterText: ''),
-      );
+    controller: _c,
+    onChanged: _changed,
+    maxLength: 60,
+    style: AppText.body,
+    textInputAction: TextInputAction.search,
+    decoration: AppInput.decoration(
+      hint: widget.hint,
+      icon: Icons.search_rounded,
+      suffix: _c.text.isEmpty
+          ? null
+          : IconButton(
+              icon: const Icon(Icons.close_rounded),
+              onPressed: () {
+                _c.clear();
+                _changed('');
+              },
+            ),
+    ).copyWith(counterText: ''),
+  );
 }
 
 /// Chip filter (kategori, urutan).
 class AppFilterChip extends StatelessWidget {
-  const AppFilterChip({super.key, required this.label, required this.selected, required this.onTap});
+  const AppFilterChip({
+    super.key,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
   final String label;
   final bool selected;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) => GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: AppMotion.fast,
-          padding: const EdgeInsets.symmetric(horizontal: AppSpace.lg, vertical: AppSpace.sm),
-          decoration: BoxDecoration(
-            color: selected ? AppColors.primary.withValues(alpha: .18) : AppColors.surface,
-            borderRadius: BorderRadius.circular(AppRadius.pill),
-            border: Border.all(color: selected ? AppColors.primary : AppColors.border),
-          ),
-          child: Text(label,
-              style: AppText.label.copyWith(color: selected ? AppColors.primary : AppColors.textDim)),
+    onTap: onTap,
+    child: AnimatedContainer(
+      duration: AppMotion.fast,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpace.lg,
+        vertical: AppSpace.sm,
+      ),
+      decoration: BoxDecoration(
+        color: selected
+            ? AppColors.primary.withValues(alpha: .18)
+            : AppColors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.pill),
+        border: Border.all(
+          color: selected ? AppColors.primary : AppColors.border,
         ),
-      );
+      ),
+      child: Text(
+        label,
+        style: AppText.label.copyWith(
+          color: selected ? AppColors.primary : AppColors.textDim,
+        ),
+      ),
+    ),
+  );
 }
 
 class AppSegmentOption<T> {
-  const AppSegmentOption(this.value, this.label, {this.color = AppColors.primary});
+  const AppSegmentOption(
+    this.value,
+    this.label, {
+    this.color = AppColors.primary,
+  });
   final T value;
   final String label;
   final Color color; // YES = AppColors.yes, NO = AppColors.no
@@ -515,39 +657,54 @@ class AppSegmentOption<T> {
 
 /// Pilihan eksklusif 2-3 opsi (YES/NO, Beli/Jual).
 class AppSegmented<T> extends StatelessWidget {
-  const AppSegmented({super.key, required this.options, required this.value, required this.onChanged});
+  const AppSegmented({
+    super.key,
+    required this.options,
+    required this.value,
+    required this.onChanged,
+  });
   final List<AppSegmentOption<T>> options;
   final T value;
   final ValueChanged<T> onChanged;
 
   @override
-  Widget build(BuildContext context) => Row(children: [
-        for (var i = 0; i < options.length; i++) ...[
-          if (i > 0) const SizedBox(width: AppSpace.sm),
-          Expanded(
-            child: GestureDetector(
-              onTap: () => onChanged(options[i].value),
-              child: AnimatedContainer(
-                duration: AppMotion.fast,
-                height: 44,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
+  Widget build(BuildContext context) => Row(
+    children: [
+      for (var i = 0; i < options.length; i++) ...[
+        if (i > 0) const SizedBox(width: AppSpace.sm),
+        Expanded(
+          child: GestureDetector(
+            onTap: () => onChanged(options[i].value),
+            child: AnimatedContainer(
+              duration: AppMotion.fast,
+              height: 44,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: options[i].value == value
+                    ? options[i].color.withValues(alpha: .18)
+                    : AppColors.surface,
+                borderRadius: BorderRadius.circular(AppRadius.md),
+                border: Border.all(
                   color: options[i].value == value
-                      ? options[i].color.withValues(alpha: .18)
-                      : AppColors.surface,
-                  borderRadius: BorderRadius.circular(AppRadius.md),
-                  border: Border.all(
-                      color: options[i].value == value ? options[i].color : AppColors.border,
-                      width: options[i].value == value ? 1.5 : 1),
+                      ? options[i].color
+                      : AppColors.border,
+                  width: options[i].value == value ? 1.5 : 1,
                 ),
-                child: Text(options[i].label,
-                    style: AppText.label.copyWith(
-                        color: options[i].value == value ? options[i].color : AppColors.textDim)),
+              ),
+              child: Text(
+                options[i].label,
+                style: AppText.label.copyWith(
+                  color: options[i].value == value
+                      ? options[i].color
+                      : AppColors.textDim,
+                ),
               ),
             ),
           ),
-        ],
-      ]);
+        ),
+      ],
+    ],
+  );
 }
 
 /// Stepper jumlah (mis. share). Nilai selalu di-clamp ke min..max.
@@ -566,34 +723,51 @@ class AppAmountStepper extends StatelessWidget {
   final String label;
 
   Widget _btn(IconData i, bool on, VoidCallback f) => IconButton(
-        onPressed: on ? f : null,
-        icon: Icon(i),
-        style: IconButton.styleFrom(
-            backgroundColor: AppColors.card,
-            foregroundColor: AppColors.text,
-            side: const BorderSide(color: AppColors.border)),
-      );
+    onPressed: on ? f : null,
+    icon: Icon(i),
+    style: IconButton.styleFrom(
+      backgroundColor: AppColors.card,
+      foregroundColor: AppColors.text,
+      side: const BorderSide(color: AppColors.border),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.all(AppSpace.sm),
-        decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(AppRadius.md),
-            border: Border.all(color: AppColors.border)),
-        child: Row(children: [
-          _btn(Icons.remove, value > min,
-              () => onChanged((value - step).clamp(min, max).toDouble())),
-          Expanded(
-            child: Column(children: [
-              Text(value % 1 == 0 ? value.toStringAsFixed(0) : value.toStringAsFixed(2),
-                  style: AppText.number),
+    padding: const EdgeInsets.all(AppSpace.sm),
+    decoration: BoxDecoration(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(AppRadius.md),
+      border: Border.all(color: AppColors.border),
+    ),
+    child: Row(
+      children: [
+        _btn(
+          Icons.remove,
+          value > min,
+          () => onChanged((value - step).clamp(min, max).toDouble()),
+        ),
+        Expanded(
+          child: Column(
+            children: [
+              Text(
+                value % 1 == 0
+                    ? value.toStringAsFixed(0)
+                    : value.toStringAsFixed(2),
+                style: AppText.number,
+              ),
               Text(label, style: AppText.caption),
-            ]),
+            ],
           ),
-          _btn(Icons.add, value < max, () => onChanged((value + step).clamp(min, max).toDouble())),
-        ]),
-      );
+        ),
+        _btn(
+          Icons.add,
+          value < max,
+          () => onChanged((value + step).clamp(min, max).toDouble()),
+        ),
+      ],
+    ),
+  );
 }
 
 // ============================================================================
@@ -623,14 +797,19 @@ class AppCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: r,
-        border: Border.all(color: borderColor ?? (glow ? AppColors.primary : AppColors.border)),
+        border: Border.all(
+          color: borderColor ?? (glow ? AppColors.primary : AppColors.border),
+        ),
         boxShadow: glow ? AppColors.glow() : null,
       ),
       child: Material(
         color: Colors.transparent,
         borderRadius: r,
         clipBehavior: Clip.antiAlias,
-        child: InkWell(onTap: onTap, child: Padding(padding: padding, child: child)),
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(padding: padding, child: child),
+        ),
       ),
     );
   }
@@ -644,11 +823,19 @@ class AppBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpace.sm, vertical: 3),
-        decoration: BoxDecoration(
-            color: color.withValues(alpha: .15), borderRadius: BorderRadius.circular(AppRadius.sm)),
-        child: Text(text, style: AppText.caption.copyWith(color: color, fontWeight: FontWeight.w600)),
-      );
+    padding: const EdgeInsets.symmetric(horizontal: AppSpace.sm, vertical: 3),
+    decoration: BoxDecoration(
+      color: color.withValues(alpha: .15),
+      borderRadius: BorderRadius.circular(AppRadius.sm),
+    ),
+    child: Text(
+      text,
+      style: AppText.caption.copyWith(
+        color: color,
+        fontWeight: FontWeight.w600,
+      ),
+    ),
+  );
 }
 
 /// Status market. Status "closed" TIDAK ada di database; dihitung dari close_at.
@@ -676,11 +863,14 @@ class CoinText extends StatelessWidget {
   final TextStyle? style;
 
   @override
-  Widget build(BuildContext context) => Row(mainAxisSize: MainAxisSize.min, children: [
-        const Icon(Icons.toll_rounded, size: 16, color: AppColors.accent),
-        const SizedBox(width: AppSpace.xs),
-        Text(Fmt.coin(value), style: style ?? AppText.numberSm),
-      ]);
+  Widget build(BuildContext context) => Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      const Icon(Icons.toll_rounded, size: 16, color: AppColors.accent),
+      const SizedBox(width: AppSpace.xs),
+      Text(Fmt.coin(value), style: style ?? AppText.numberSm),
+    ],
+  );
 }
 
 /// Bar peluang YES vs NO. `yes` = 0..1 (price_yes dari database).
@@ -691,32 +881,46 @@ class ProbabilityBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = yes.clamp(0.0, 1.0).toDouble();
-    return Column(children: [
-      Row(children: [
-        Text('YES ${Fmt.pct(p)}', style: AppText.numberSm.copyWith(color: AppColors.yes)),
-        const Spacer(),
-        Text('NO ${Fmt.pct(1 - p)}', style: AppText.numberSm.copyWith(color: AppColors.no)),
-      ]),
-      const Gap(6),
-      ClipRRect(
-        borderRadius: BorderRadius.circular(AppRadius.pill),
-        child: SizedBox(
-          height: 8,
-          child: Stack(fit: StackFit.expand, children: [
-            Container(color: AppColors.no.withValues(alpha: .35)),
-            TweenAnimationBuilder<double>(
-              tween: Tween(end: p),
-              duration: AppMotion.normal,
-              curve: AppMotion.curve,
-              builder: (_, v, __) => FractionallySizedBox(
-                  alignment: Alignment.centerLeft,
-                  widthFactor: v,
-                  child: Container(color: AppColors.yes)),
+    return Column(
+      children: [
+        Row(
+          children: [
+            Text(
+              'YES ${Fmt.pct(p)}',
+              style: AppText.numberSm.copyWith(color: AppColors.yes),
             ),
-          ]),
+            const Spacer(),
+            Text(
+              'NO ${Fmt.pct(1 - p)}',
+              style: AppText.numberSm.copyWith(color: AppColors.no),
+            ),
+          ],
         ),
-      ),
-    ]);
+        const Gap(6),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(AppRadius.pill),
+          child: SizedBox(
+            height: 8,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Container(color: AppColors.no.withValues(alpha: .35)),
+                TweenAnimationBuilder<double>(
+                  tween: Tween(end: p),
+                  duration: AppMotion.normal,
+                  curve: AppMotion.curve,
+                  builder: (_, v, __) => FractionallySizedBox(
+                    alignment: Alignment.centerLeft,
+                    widthFactor: v,
+                    child: Container(color: AppColors.yes),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -741,66 +945,97 @@ class MarketCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => AppCard(
-        onTap: onTap,
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
+    onTap: onTap,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
             AppBadge(category.toUpperCase()),
             const SizedBox(width: AppSpace.sm),
             AppBadge(status.label, color: status.color),
             const Spacer(),
             CoinText(volume, style: AppText.caption),
-          ]),
-          const Gap(AppSpace.md),
-          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          ],
+        ),
+        const Gap(AppSpace.md),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             if (imageUrl != null) ...[
               ClipRRect(
                 borderRadius: BorderRadius.circular(AppRadius.sm),
                 child: CachedNetworkImage(
-                    imageUrl: imageUrl!,
-                    width: 52,
-                    height: 52,
-                    fit: BoxFit.cover,
-                    errorWidget: (_, __, ___) => const SizedBox(width: 52, height: 52)),
+                  imageUrl: imageUrl!,
+                  width: 52,
+                  height: 52,
+                  fit: BoxFit.cover,
+                  errorWidget: (_, __, ___) =>
+                      const SizedBox(width: 52, height: 52),
+                ),
               ),
               const SizedBox(width: AppSpace.md),
             ],
             Expanded(
-                child: Text(title, style: AppText.heading, maxLines: 2, overflow: TextOverflow.ellipsis)),
-          ]),
-          const Gap(AppSpace.lg),
-          ProbabilityBar(yes: priceYes),
-          const Gap(AppSpace.md),
-          Text(footer, style: AppText.caption),
-        ]),
-      );
+              child: Text(
+                title,
+                style: AppText.heading,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+        const Gap(AppSpace.lg),
+        ProbabilityBar(yes: priceYes),
+        const Gap(AppSpace.md),
+        Text(footer, style: AppText.caption),
+      ],
+    ),
+  );
 }
 
 /// Angka ringkas (saldo, PnL). `delta` != null menampilkan panah hijau/merah.
 class StatTile extends StatelessWidget {
-  const StatTile({super.key, required this.label, required this.value, this.icon, this.delta});
+  const StatTile({
+    super.key,
+    required this.label,
+    required this.value,
+    this.icon,
+    this.delta,
+  });
   final String label, value;
   final IconData? icon;
   final double? delta;
 
   @override
   Widget build(BuildContext context) => AppCard(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
             if (icon != null) ...[
               Icon(icon, size: 16, color: AppColors.accent),
-              const SizedBox(width: AppSpace.xs)
+              const SizedBox(width: AppSpace.xs),
             ],
             Text(label, style: AppText.caption),
-          ]),
-          const Gap(AppSpace.sm),
-          Text(value, style: AppText.number),
-          if (delta != null) ...[
-            const Gap(AppSpace.xs),
-            Text('${delta! >= 0 ? '▲' : '▼'} ${Fmt.coin(delta!.abs())}',
-                style: AppText.numberSm.copyWith(color: delta! >= 0 ? AppColors.yes : AppColors.no)),
           ],
-        ]),
-      );
+        ),
+        const Gap(AppSpace.sm),
+        Text(value, style: AppText.number),
+        if (delta != null) ...[
+          const Gap(AppSpace.xs),
+          Text(
+            '${delta! >= 0 ? '▲' : '▼'} ${Fmt.coin(delta!.abs())}',
+            style: AppText.numberSm.copyWith(
+              color: delta! >= 0 ? AppColors.yes : AppColors.no,
+            ),
+          ),
+        ],
+      ],
+    ),
+  );
 }
 
 /// Foto profil bulat; jika tidak ada URL tampil huruf awal.
@@ -813,21 +1048,31 @@ class AppAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final initial = Center(
-        child: Text(name.isEmpty ? '?' : name[0].toUpperCase(),
-            style: AppText.title.copyWith(fontSize: radius * .8, color: AppColors.primary)));
+      child: Text(
+        name.isEmpty ? '?' : name[0].toUpperCase(),
+        style: AppText.title.copyWith(
+          fontSize: radius * .8,
+          color: AppColors.primary,
+        ),
+      ),
+    );
     return Container(
       width: radius * 2,
       height: radius * 2,
       decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: AppColors.card,
-          border: Border.all(color: AppColors.primary, width: 2),
-          boxShadow: AppColors.glow()),
+        shape: BoxShape.circle,
+        color: AppColors.card,
+        border: Border.all(color: AppColors.primary, width: 2),
+        boxShadow: AppColors.glow(),
+      ),
       child: ClipOval(
         child: url == null
             ? initial
             : CachedNetworkImage(
-                imageUrl: url!, fit: BoxFit.cover, errorWidget: (_, __, ___) => initial),
+                imageUrl: url!,
+                fit: BoxFit.cover,
+                errorWidget: (_, __, ___) => initial,
+              ),
       ),
     );
   }
@@ -842,15 +1087,21 @@ class SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(bottom: AppSpace.md),
-        child: Row(children: [
-          Expanded(child: Text(title, style: AppText.heading)),
-          if (action != null)
-            GestureDetector(
-                onTap: onAction,
-                child: Text(action!, style: AppText.label.copyWith(color: AppColors.primary))),
-        ]),
-      );
+    padding: const EdgeInsets.only(bottom: AppSpace.md),
+    child: Row(
+      children: [
+        Expanded(child: Text(title, style: AppText.heading)),
+        if (action != null)
+          GestureDetector(
+            onTap: onAction,
+            child: Text(
+              action!,
+              style: AppText.label.copyWith(color: AppColors.primary),
+            ),
+          ),
+      ],
+    ),
+  );
 }
 
 /// Baris menu (profil, pengaturan). Letakkan di dalam AppCard(padding: EdgeInsets.zero).
@@ -862,12 +1113,14 @@ class AppListTile extends StatelessWidget {
     this.subtitle,
     this.onTap,
     this.danger = false,
+    this.trailing,
   });
   final IconData icon;
   final String title;
   final String? subtitle;
   final VoidCallback? onTap;
   final bool danger;
+  final Widget? trailing; // menggantikan chevron bila diisi
 
   @override
   Widget build(BuildContext context) {
@@ -876,16 +1129,32 @@ class AppListTile extends StatelessWidget {
       onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.all(AppSpace.lg),
-        child: Row(children: [
-          Icon(icon, color: danger ? AppColors.no : AppColors.primary, size: 22),
-          const SizedBox(width: AppSpace.lg),
-          Expanded(
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(title, style: AppText.body.copyWith(color: c)),
-            if (subtitle != null) Text(subtitle!, style: AppText.caption),
-          ])),
-          if (!danger) const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
-        ]),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: danger ? AppColors.no : AppColors.primary,
+              size: 22,
+            ),
+            const SizedBox(width: AppSpace.lg),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: AppText.body.copyWith(color: c)),
+                  if (subtitle != null) Text(subtitle!, style: AppText.caption),
+                ],
+              ),
+            ),
+            if (trailing != null)
+              trailing!
+            else if (!danger)
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: AppColors.textMuted,
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -902,46 +1171,56 @@ class PriceChart extends StatelessWidget {
     const hide = AxisTitles(sideTitles: SideTitles(showTitles: false));
     return SizedBox(
       height: height,
-      child: LineChart(LineChartData(
-        minY: 0,
-        maxY: 1,
-        borderData: FlBorderData(show: false),
-        gridData: FlGridData(
-          drawVerticalLine: false,
-          horizontalInterval: .25,
-          getDrawingHorizontalLine: (_) => const FlLine(color: AppColors.border, strokeWidth: .6),
-        ),
-        titlesData: FlTitlesData(
-          topTitles: hide,
-          rightTitles: hide,
-          bottomTitles: hide,
-          leftTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              reservedSize: 38,
-              interval: .25,
-              getTitlesWidget: (v, _) => Text(Fmt.pct(v), style: AppText.caption),
-            ),
+      child: LineChart(
+        LineChartData(
+          minY: 0,
+          maxY: 1,
+          borderData: FlBorderData(show: false),
+          gridData: FlGridData(
+            drawVerticalLine: false,
+            horizontalInterval: .25,
+            getDrawingHorizontalLine: (_) =>
+                const FlLine(color: AppColors.border, strokeWidth: .6),
           ),
-        ),
-        lineBarsData: [
-          LineChartBarData(
-            spots: [for (var i = 0; i < data.length; i++) FlSpot(i.toDouble(), data[i])],
-            isCurved: true,
-            color: AppColors.primary,
-            barWidth: 2.5,
-            dotData: const FlDotData(show: false),
-            belowBarData: BarAreaData(
-              show: true,
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [AppColors.primary.withValues(alpha: .3), AppColors.primary.withValues(alpha: 0)],
+          titlesData: FlTitlesData(
+            topTitles: hide,
+            rightTitles: hide,
+            bottomTitles: hide,
+            leftTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 38,
+                interval: .25,
+                getTitlesWidget: (v, _) =>
+                    Text(Fmt.pct(v), style: AppText.caption),
               ),
             ),
           ),
-        ],
-      )),
+          lineBarsData: [
+            LineChartBarData(
+              spots: [
+                for (var i = 0; i < data.length; i++)
+                  FlSpot(i.toDouble(), data[i]),
+              ],
+              isCurved: true,
+              color: AppColors.primary,
+              barWidth: 2.5,
+              dotData: const FlDotData(show: false),
+              belowBarData: BarAreaData(
+                show: true,
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    AppColors.primary.withValues(alpha: .3),
+                    AppColors.primary.withValues(alpha: 0),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -954,13 +1233,22 @@ class PriceChart extends StatelessWidget {
 class AppLoading extends StatelessWidget {
   const AppLoading({super.key});
   @override
-  Widget build(BuildContext context) =>
-      const Center(child: Padding(padding: EdgeInsets.all(AppSpace.xl), child: CircularProgressIndicator()));
+  Widget build(BuildContext context) => const Center(
+    child: Padding(
+      padding: EdgeInsets.all(AppSpace.xl),
+      child: CircularProgressIndicator(),
+    ),
+  );
 }
 
 /// Placeholder berdenyut untuk daftar/kartu yang sedang dimuat.
 class AppSkeleton extends StatefulWidget {
-  const AppSkeleton({super.key, this.width, this.height = 16, this.radius = AppRadius.sm});
+  const AppSkeleton({
+    super.key,
+    this.width,
+    this.height = 16,
+    this.radius = AppRadius.sm,
+  });
   final double? width;
   final double height, radius;
 
@@ -968,9 +1256,12 @@ class AppSkeleton extends StatefulWidget {
   State<AppSkeleton> createState() => _AppSkeletonState();
 }
 
-class _AppSkeletonState extends State<AppSkeleton> with SingleTickerProviderStateMixin {
-  late final _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1100))
-    ..repeat(reverse: true);
+class _AppSkeletonState extends State<AppSkeleton>
+    with SingleTickerProviderStateMixin {
+  late final _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1100),
+  )..repeat(reverse: true);
 
   @override
   void dispose() {
@@ -980,19 +1271,27 @@ class _AppSkeletonState extends State<AppSkeleton> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
-        animation: _c,
-        builder: (_, __) => Container(
-          width: widget.width,
-          height: widget.height,
-          decoration: BoxDecoration(
-              color: Color.lerp(AppColors.card, AppColors.border, _c.value),
-              borderRadius: BorderRadius.circular(widget.radius)),
-        ),
-      );
+    animation: _c,
+    builder: (_, __) => Container(
+      width: widget.width,
+      height: widget.height,
+      decoration: BoxDecoration(
+        color: Color.lerp(AppColors.card, AppColors.border, _c.value),
+        borderRadius: BorderRadius.circular(widget.radius),
+      ),
+    ),
+  );
 }
 
 class _StateView extends StatelessWidget {
-  const _StateView(this.icon, this.color, this.title, this.message, this.actionLabel, this.onAction);
+  const _StateView(
+    this.icon,
+    this.color,
+    this.title,
+    this.message,
+    this.actionLabel,
+    this.onAction,
+  );
   final IconData icon;
   final Color color;
   final String title, message;
@@ -1001,34 +1300,50 @@ class _StateView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Center(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpace.xl),
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Container(
-              width: 72,
-              height: 72,
-              decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: color.withValues(alpha: .12),
-                  border: Border.all(color: color.withValues(alpha: .5))),
-              child: Icon(icon, color: color, size: 32),
+    child: Padding(
+      padding: const EdgeInsets.all(AppSpace.xl),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: color.withValues(alpha: .12),
+              border: Border.all(color: color.withValues(alpha: .5)),
             ),
+            child: Icon(icon, color: color, size: 32),
+          ),
+          const Gap(AppSpace.lg),
+          Text(title, style: AppText.heading, textAlign: TextAlign.center),
+          const Gap(AppSpace.xs),
+          Text(message, style: AppText.bodyDim, textAlign: TextAlign.center),
+          if (actionLabel != null) ...[
             const Gap(AppSpace.lg),
-            Text(title, style: AppText.heading, textAlign: TextAlign.center),
-            const Gap(AppSpace.xs),
-            Text(message, style: AppText.bodyDim, textAlign: TextAlign.center),
-            if (actionLabel != null) ...[
-              const Gap(AppSpace.lg),
-              AppButton(label: actionLabel!, onPressed: onAction, variant: AppButtonVariant.secondary, expanded: false),
-            ],
-          ]),
-        ),
-      );
+            AppButton(
+              label: actionLabel!,
+              onPressed: onAction,
+              variant: AppButtonVariant.secondary,
+              expanded: false,
+            ),
+          ],
+        ],
+      ),
+    ),
+  );
 }
 
 /// Data kosong (daftar belum ada isi).
 class EmptyState extends StatelessWidget {
-  const EmptyState({super.key, required this.title, required this.message, this.icon = Icons.nightlight_round, this.actionLabel, this.onAction});
+  const EmptyState({
+    super.key,
+    required this.title,
+    required this.message,
+    this.icon = Icons.nightlight_round,
+    this.actionLabel,
+    this.onAction,
+  });
   final String title, message;
   final IconData icon;
   final String? actionLabel;
@@ -1044,15 +1359,25 @@ class ErrorState extends StatelessWidget {
   final String message;
   final VoidCallback onRetry;
   @override
-  Widget build(BuildContext context) =>
-      _StateView(Icons.bolt_rounded, AppColors.no, 'Terjadi masalah', message, 'Coba lagi', onRetry);
+  Widget build(BuildContext context) => _StateView(
+    Icons.bolt_rounded,
+    AppColors.no,
+    'Terjadi masalah',
+    message,
+    'Coba lagi',
+    onRetry,
+  );
 }
 
 enum ToastType { success, error, info }
 
 /// Notifikasi singkat di bawah layar.
 class AppToast {
-  static void show(BuildContext context, String message, {ToastType type = ToastType.info}) {
+  static void show(
+    BuildContext context,
+    String message, {
+    ToastType type = ToastType.info,
+  }) {
     final (color, icon) = switch (type) {
       ToastType.success => (AppColors.yes, Icons.check_circle_rounded),
       ToastType.error => (AppColors.no, Icons.error_rounded),
@@ -1060,40 +1385,60 @@ class AppToast {
     };
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: AppColors.card,
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppRadius.md), side: BorderSide(color: color)),
-        content: Row(children: [
-          Icon(icon, color: color, size: 20),
-          const SizedBox(width: AppSpace.md),
-          Expanded(child: Text(message, style: AppText.body)),
-        ]),
-      ));
+      ..showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: AppColors.card,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.md),
+            side: BorderSide(color: color),
+          ),
+          content: Row(
+            children: [
+              Icon(icon, color: color, size: 20),
+              const SizedBox(width: AppSpace.md),
+              Expanded(child: Text(message, style: AppText.body)),
+            ],
+          ),
+        ),
+      );
   }
 }
 
 /// Konfirmasi aksi berisiko. Mengembalikan true jika dikonfirmasi.
 class AppConfirmDialog {
-  static Future<bool> show(BuildContext context,
-      {required String title, required String message, String confirmLabel = 'Ya', bool danger = false}) async {
+  static Future<bool> show(
+    BuildContext context, {
+    required String title,
+    required String message,
+    String confirmLabel = 'Ya',
+    bool danger = false,
+  }) async {
     final r = await showDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(
         backgroundColor: AppColors.card,
         shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-            side: const BorderSide(color: AppColors.border)),
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          side: const BorderSide(color: AppColors.border),
+        ),
         title: Text(title, style: AppText.title),
         content: Text(message, style: AppText.bodyDim),
         actions: [
-          AppButton(label: 'Batal', variant: AppButtonVariant.ghost, expanded: false, onPressed: () => Navigator.pop(c, false)),
           AppButton(
-              label: confirmLabel,
-              variant: danger ? AppButtonVariant.danger : AppButtonVariant.primary,
-              expanded: false,
-              onPressed: () => Navigator.pop(c, true)),
+            label: 'Batal',
+            variant: AppButtonVariant.ghost,
+            expanded: false,
+            onPressed: () => Navigator.pop(c, false),
+          ),
+          AppButton(
+            label: confirmLabel,
+            variant: danger
+                ? AppButtonVariant.danger
+                : AppButtonVariant.primary,
+            expanded: false,
+            onPressed: () => Navigator.pop(c, true),
+          ),
         ],
       ),
     );
@@ -1103,28 +1448,39 @@ class AppConfirmDialog {
 
 /// Panel dari bawah (trading, filter, form singkat). Otomatis naik saat keyboard muncul.
 class AppBottomSheet {
-  static Future<T?> show<T>(BuildContext context, {required String title, required Widget child}) =>
-      showModalBottomSheet<T>(
-        context: context,
-        isScrollControlled: true,
-        useSafeArea: true,
-        builder: (c) => Padding(
-          padding: EdgeInsets.only(bottom: MediaQuery.of(c).viewInsets.bottom),
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(AppSpace.lg),
-            child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Center(
-                  child: Container(
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                          color: AppColors.border, borderRadius: BorderRadius.circular(AppRadius.pill)))),
-              const Gap(AppSpace.lg),
-              Text(title, style: AppText.title),
-              const Gap(AppSpace.lg),
-              child,
-            ]),
-          ),
+  static Future<T?> show<T>(
+    BuildContext context, {
+    required String title,
+    required Widget child,
+  }) => showModalBottomSheet<T>(
+    context: context,
+    isScrollControlled: true,
+    useSafeArea: true,
+    builder: (c) => Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(c).viewInsets.bottom),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(AppSpace.lg),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.border,
+                  borderRadius: BorderRadius.circular(AppRadius.pill),
+                ),
+              ),
+            ),
+            const Gap(AppSpace.lg),
+            Text(title, style: AppText.title),
+            const Gap(AppSpace.lg),
+            child,
+          ],
         ),
-      );
+      ),
+    ),
+  );
 }

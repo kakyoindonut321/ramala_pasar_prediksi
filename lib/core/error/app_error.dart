@@ -14,7 +14,10 @@ class AppError {
     'insufficient_shares': 'Share tidak cukup.',
     'forbidden': 'Anda tidak punya akses.',
     'invalid_close_at': 'Waktu tutup tidak valid.',
-    'already_settled': 'Market sudah diselesaikan.',
+    'already_settled': 'Data sudah diselesaikan sebelumnya.',
+    'invalid_amount': 'Jumlah top up tidak valid.',
+    'pending_exists': 'Masih ada permintaan top up yang menunggu persetujuan.',
+    'request_not_found': 'Permintaan tidak ditemukan.',
   };
 
   static String message(Object e) {

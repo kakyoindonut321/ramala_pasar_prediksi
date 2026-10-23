@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:ramala/core/error/app_error.dart';
 import 'package:ramala/core/validators/validators.dart';
 import 'package:ramala/features/market/domain/market.dart';
 import 'package:ramala/features/market/presentation/market_providers.dart';
-import 'package:ramala/template.dart';
-import 'package:intl/intl.dart';
 import 'package:ramala/features/notification/presentation/notification_page.dart';
+import 'package:ramala/template.dart';
 
 class MarketListPage extends ConsumerStatefulWidget {
   const MarketListPage({super.key});
@@ -16,21 +16,40 @@ class MarketListPage extends ConsumerStatefulWidget {
 }
 
 class _MarketListPageState extends ConsumerState<MarketListPage> {
+  static const _step = 30;
   String _q = '';
-  bool? _open; // null = semua
-  String? _cat;
-  bool _showDone = false;
+  String? _cat; // null = Semua
+  bool _done = false;
+  String _sort = 'trending';
+  int _limit = _step;
+  List<Market>?
+  _last; // daftar terakhir, dipakai agar tidak berkedip saat "lebih banyak"
+
+  get _key =>
+      (text: _q, category: _cat, done: _done, sort: _sort, limit: _limit);
+
+  /// Ubah filter: kembali ke halaman pertama
+  void _filter(VoidCallback f) => setState(() {
+    f();
+    _limit = _step;
+    _last = null;
+  });
 
   Future<void> _refresh() async {
-    ref.invalidate(marketListProvider(_q));
+    ref.invalidate(marketPageProvider(_key));
+    ref.invalidate(categoriesProvider);
     try {
-      await ref.read(marketListProvider(_q).future);
-    } catch (_) {} // error tampil lewat state provider
+      await ref.read(marketPageProvider(_key).future);
+    } catch (_) {}
   }
 
   @override
   Widget build(BuildContext context) {
-    final async = ref.watch(marketListProvider(_q));
+    final async = ref.watch(marketPageProvider(_key));
+    final cats = ref.watch(categoriesProvider).value ?? const <String>[];
+    if (async.hasValue) _last = async.value;
+    final items = _last;
+
     return AppScaffold(
       title: 'Pasar',
       actions: const [NotifBell()],
@@ -38,24 +57,80 @@ class _MarketListPageState extends ConsumerState<MarketListPage> {
       children: [
         AppSearchBar(
           hint: 'Cari market...',
-          onSearch: (s) => setState(() => _q = Validators.searchTerm(s)),
+          onSearch: (s) => _filter(() => _q = Validators.searchTerm(s)),
         ),
         const Gap(AppSpace.md),
-        async.when(
-          loading: () => Column(
-            children: [
-              for (var i = 0; i < 3; i++) ...[
-                const AppSkeleton(height: 110),
-                const Gap(AppSpace.md),
-              ],
-            ],
-          ),
-          error: (e, _) => ErrorState(
-            message: AppError.message(e),
-            onRetry: () => ref.invalidate(marketListProvider(_q)),
-          ),
-          data: _buildList,
+        AppSegmented<bool>(
+          options: [
+            AppSegmentOption(false, 'Aktif'),
+            AppSegmentOption(true, 'Selesai'),
+          ],
+          value: _done,
+          onChanged: (v) => _filter(() => _done = v),
         ),
+        const Gap(AppSpace.sm),
+        AppSegmented<String>(
+          options: [
+            AppSegmentOption('trending', 'Trending'),
+            AppSegmentOption('newest', 'Terbaru'),
+          ],
+          value: _sort,
+          onChanged: (v) => _filter(() => _sort = v),
+        ),
+        const Gap(AppSpace.md),
+        Wrap(
+          spacing: AppSpace.sm,
+          runSpacing: AppSpace.sm,
+          children: [
+            AppFilterChip(
+              label: 'Semua',
+              selected: _cat == null,
+              onTap: () => _filter(() => _cat = null),
+            ),
+            for (final c in cats)
+              AppFilterChip(
+                label: c,
+                selected: _cat == c,
+                onTap: () => _filter(() => _cat = _cat == c ? null : c),
+              ),
+          ],
+        ),
+        const Gap(AppSpace.lg),
+        if (items == null)
+          async.hasError
+              ? ErrorState(
+                  message: AppError.message(async.error!),
+                  onRetry: () => ref.invalidate(marketPageProvider(_key)),
+                )
+              : Column(
+                  children: [
+                    for (var i = 0; i < 3; i++) ...[
+                      const AppSkeleton(height: 110),
+                      const Gap(AppSpace.md),
+                    ],
+                  ],
+                )
+        else if (items.isEmpty)
+          EmptyState(
+            title: 'Market tidak ditemukan',
+            message: _done
+                ? 'Belum ada market yang selesai.'
+                : 'Coba kata kunci atau filter lain.',
+            icon: Icons.search_off,
+          )
+        else ...[
+          for (final m in items) _card(m),
+          // Jumlah == limit berarti kemungkinan masih ada sisanya
+          if (items.length >= _limit)
+            AppButton(
+              label: 'Tampilkan lebih banyak pasar',
+              icon: Icons.expand_more,
+              variant: AppButtonVariant.ghost,
+              expanded: true,
+              loading: async.isLoading,
+              onPressed: () => setState(() => _limit += _step),
+            ),
+        ],
       ],
     );
   }
@@ -77,66 +152,4 @@ class _MarketListPageState extends ConsumerState<MarketListPage> {
       onTap: () => context.push('/market/${m.id}'),
     ),
   );
-
-  Widget _buildList(List<Market> all) {
-    final cats = ({...all.map((m) => m.category)}.toList()..sort());
-    final filtered = all
-        .where((m) => _cat == null || m.category == _cat)
-        .toList();
-    // Aktif: yang paling cepat tutup di atas. Selesai: yang terbaru di atas.
-    final active = filtered.where((m) => m.isOpen).toList()
-      ..sort((a, b) => a.closeAt.compareTo(b.closeAt));
-    final done = filtered.where((m) => !m.isOpen).toList()
-      ..sort((a, b) => b.closeAt.compareTo(a.closeAt));
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (cats.isNotEmpty)
-          Wrap(
-            spacing: AppSpace.sm,
-            runSpacing: AppSpace.sm,
-            children: [
-              for (final c in cats)
-                AppFilterChip(
-                  label: c,
-                  selected: _cat == c,
-                  onTap: () => setState(() => _cat = _cat == c ? null : c),
-                ),
-            ],
-          ),
-        const Gap(AppSpace.lg),
-        if (active.isEmpty && done.isEmpty)
-          const EmptyState(
-            title: 'Market tidak ditemukan',
-            message: 'Coba kata kunci atau filter lain.',
-            icon: Icons.search_off,
-          )
-        else ...[
-          if (active.isEmpty)
-            const EmptyState(
-              title: 'Tidak ada market aktif',
-              message: 'Market yang sudah selesai ada di bagian bawah.',
-              icon: Icons.hourglass_empty,
-            )
-          else
-            for (final m in active) _card(m),
-          if (done.isNotEmpty) ...[
-            const Gap(AppSpace.sm),
-            AppButton(
-              label: _showDone
-                  ? 'Sembunyikan market selesai (${done.length})'
-                  : 'Lihat market selesai (${done.length})',
-              icon: _showDone ? Icons.expand_less : Icons.expand_more,
-              variant: AppButtonVariant.ghost,
-              onPressed: () => setState(() => _showDone = !_showDone),
-            ),
-            const Gap(AppSpace.md),
-            if (_showDone)
-              for (final m in done) _card(m),
-          ],
-        ],
-      ],
-    );
-  }
 }
