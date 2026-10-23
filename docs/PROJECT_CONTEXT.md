@@ -1,120 +1,120 @@
 # PROJECT_CONTEXT.md — Ramala
 
-> **Purpose**: Provides a complete, verified reference for AI coding assistants working on this codebase. Read this before making any changes to the project.
-> **Last updated**: 2026-10-22
-> **Coverage**: All files under `lib/`, `pubspec.yaml`, and all six `docs/` files inspected.
+> **Tujuan**: Referensi lengkap dan terverifikasi untuk asisten AI yang bekerja pada codebase ini. Baca dokumen ini sebelum melakukan perubahan apapun pada proyek.
+> **Terakhir diperbarui**: 2026-10-23
+> **Cakupan**: Semua file di bawah `lib/`, `pubspec.yaml`, seluruh file `docs/`, dan migrasi `supabase/migrations/` telah diinspeksi.
 
 ---
 
-## 1. Project Overview
+## 1. Gambaran Umum Proyek
 
-**Ramala** is an Android prediction market application styled after Kalshi/Polymarket, built with Flutter/Dart as a university final project (_Tugas Akhir_) for the course _Pemrograman Aplikasi Mobile_. All trading uses **dummy coins** — no real money. The app is intended for academic demonstration and written entirely in **Bahasa Indonesia** (UI text).
+**Ramala** adalah aplikasi pasar prediksi Android yang terinspirasi dari Kalshi/Polymarket, dibangun dengan Flutter/Dart sebagai Tugas Akhir mata kuliah _Pemrograman Aplikasi Mobile_. Semua transaksi menggunakan **koin dummy** — tidak ada uang sungguhan. Aplikasi ditujukan untuk keperluan akademis dan seluruh teks antarmuka ditulis dalam **Bahasa Indonesia**.
 
-- **App name**: Ramala
-- **Package ID**: `com.example.ramala` (applicationId in `build.gradle.kts`)
-- **Version**: `1.0.0+1`
-- **Primary platform**: Android (iOS not targeted; `flutter_launcher_icons` sets `ios: false`)
-- **All backend services are free-tier**: Supabase, Cloudinary, Gemini Flash, CoinGecko, ExchangeRate-API, OpenStreetMap.
+- **Nama aplikasi**: Ramala
+- **Package ID**: `com.example.ramala` (applicationId di `build.gradle.kts`)
+- **Versi**: `1.0.0+1`
+- **Platform utama**: Android (iOS tidak ditargetkan; `flutter_launcher_icons` mengatur `ios: false`)
+- **Semua layanan backend menggunakan tier gratis**: Supabase, Cloudinary, Gemini Flash, Groq, CoinGecko, ExchangeRate-API, OpenStreetMap.
 
 ---
 
-## 2. Requirements and Intended Behavior
+## 2. Persyaratan dan Perilaku yang Diharapkan
 
-Source: `docs/ketentuan_tugas_akhir.txt`
+Sumber: `docs/ketentuan_tugas_akhir.txt`
 
-| Requirement | Status (verified from code) |
+| Persyaratan | Status (terverifikasi dari kode) |
 |---|---|
-| Login with encryption (no Firebase) | ✅ Supabase Auth + `flutter_secure_storage` |
-| Biometric login | ✅ `local_auth` with fallback PIN |
-| Local + online database | ✅ sqflite (offline cache) + Supabase (online) |
-| Web service / API (LBS, game, or multiplatform) | ✅ Supabase RPC, Cloudinary, Gemini, ExchangeRate-API, CoinGecko, OpenStreetMap |
-| Navigation menu: profile (with image), feedback, logout | ✅ All present |
-| Currency converter (min. 3) + time zone converter (WIB, WIT, WITA, London) | ✅ 5 fiat currencies + 3 crypto; 4 time zones |
-| Min. 2 sensors (Accelerometer, Gyroscope, etc.) | ✅ Both used in game feature |
-| AI/LLM feature | ✅ Gemini chatbot |
-| Mini game | ✅ "Tebak Arah" sensor game |
-| Search and selection facility | ✅ Market list search + category filter |
-| Mobile notification feature | ✅ local notifications + Supabase Realtime + Workmanager |
-| Simple blockchain feature | ✅ `ledger` table with SHA-256 chain, `verify_ledger()` RPC |
+| Login dengan enkripsi (tanpa Firebase) | ✅ Supabase Auth + `flutter_secure_storage` |
+| Login biometrik | ✅ `local_auth` dengan fallback PIN |
+| Database lokal + online | ✅ sqflite (cache offline) + Supabase (online) |
+| Web service / API (LBS, game, atau multiplatform) | ✅ Supabase RPC, Cloudinary, Gemini+Groq, ExchangeRate-API, CoinGecko, OpenStreetMap |
+| Menu navigasi: profil (dengan gambar), saran/kesan, logout | ✅ Semua tersedia |
+| Konverter mata uang (min. 3) + konverter zona waktu (WIB, WIT, WITA, London) | ✅ 5 mata uang fiat + 3 kripto; 4 zona waktu |
+| Min. 2 sensor (Akselerometer, Giroskop, dll.) | ✅ Keduanya digunakan pada fitur game |
+| Fitur AI/LLM | ✅ Chatbot Gemini dengan failsafe Groq |
+| Mini game | ✅ Game sensor "Tebak Arah" |
+| Fasilitas pencarian dan pemilihan | ✅ Pencarian daftar market + filter kategori |
+| Fitur notifikasi mobile | ✅ local notifications + Supabase Realtime + Workmanager |
+| Fitur blockchain sederhana | ✅ Tabel `ledger` dengan rantai SHA-256, RPC `verify_ledger()` |
 
 ---
 
-## 3. Technology Stack and Dependencies
+## 3. Stack Teknologi dan Dependensi
 
-### Core Framework
+### Framework Utama
 - **Flutter SDK**: `^3.13.5` (Dart)
-- **State management**: `flutter_riverpod: ^3.4.3` — used **without codegen** (no `freezed`, no `build_runner`, no `riverpod_generator`)
+- **State management**: `flutter_riverpod: ^3.4.3` — digunakan **tanpa codegen** (tidak ada `freezed`, `build_runner`, atau `riverpod_generator`)
 - **Routing**: `go_router: ^18.1.0`
 
 ### Backend & Auth
-- `supabase_flutter: ^2.18.3` — auth, database, realtime, RPC calls
-- `flutter_secure_storage: ^11.2.0` — session token storage (Android Keystore)
-- `local_auth: ^3.0.2` — biometric (fingerprint/face + PIN fallback)
+- `supabase_flutter: ^2.18.3` — auth, database, realtime, panggilan RPC
+- `flutter_secure_storage: ^11.2.0` — penyimpanan token sesi (Android Keystore)
+- `local_auth: ^3.0.2` — biometrik (sidik jari/wajah + fallback PIN)
 
-### Storage
-- `sqflite: ^2.4.4+2` — local SQLite cache (3 tables: `cache`, `chat_messages`, `search_history`)
-- `path: ^1.9.1` — file path utilities for sqflite
+### Penyimpanan
+- `sqflite: ^2.4.4+2` — cache SQLite lokal (3 tabel: `cache`, `chat_messages`, `search_history`)
+- `path: ^1.9.1` — utilitas path file untuk sqflite
 
-### Networking
-- `dio: ^5.11.1` — HTTP client for Gemini AI and Cloudinary (not used for Supabase)
+### Jaringan
+- `dio: ^5.11.1` — HTTP client untuk Gemini AI, Groq, dan Cloudinary (tidak digunakan untuk Supabase)
 
 ### Media
-- `image_picker: ^1.2.4` — gallery photo selection for avatar
-- `flutter_image_compress: ^2.5.1` — JPEG compression before Cloudinary upload
-- `cached_network_image: ^4.0.4` — network image caching
+- `image_picker: ^1.2.4` — pemilihan foto dari galeri untuk avatar dan gambar market
+- `flutter_image_compress: ^2.5.1` — kompresi JPEG sebelum upload ke Cloudinary
+- `cached_network_image: ^4.0.4` — caching gambar jaringan
 
-### Charts & Data
-- `fl_chart: ^1.2.0` — `PriceChart` widget (line chart for YES price history)
-- `crypto: ^3.0.7` — SHA-256 hash (available but actual chain verification done by Postgres `verify_ledger()` RPC)
-- `intl: ^0.20.3` — date formatting, number formatting
-- `timezone: ^0.11.2` — timezone conversions in converter
-- `latlong2: ^0.10.1` — `LatLng` type for map coordinates
+### Grafik & Data
+- `fl_chart: ^1.2.0` — widget `PriceChart` (line chart untuk riwayat harga YES)
+- `crypto: ^3.0.7` — hash SHA-256 (tersedia tapi komputasi rantai dilakukan oleh Postgres `verify_ledger()`)
+- `intl: ^0.20.3` — format tanggal, format angka
+- `timezone: ^0.11.2` — konversi zona waktu di konverter
+- `latlong2: ^0.10.1` — tipe `LatLng` untuk koordinat peta
 
-### Location & Map
-- `geolocator: ^14.1.2` — GPS location
-- `flutter_map: ^8.3.2` — OpenStreetMap tile map
-- `permission_handler: ^13.0.2` — runtime permission management
+### Lokasi & Peta
+- `geolocator: ^14.1.2` — lokasi GPS
+- `flutter_map: ^8.3.2` — peta tile OpenStreetMap
+- `permission_handler: ^13.0.2` — manajemen izin runtime
 
-### Notifications & Background
-- `flutter_local_notifications: ^22.3.2` — on-device notifications
-- `workmanager: ^0.10.10` — background polling (min 15 min interval on Android)
+### Notifikasi & Background
+- `flutter_local_notifications: ^22.3.2` — notifikasi on-device
+- `workmanager: ^0.10.10` — polling background (interval minimum 15 menit di Android)
 
-### Sensors
-- `sensors_plus: ^7.1.1` — accelerometer and gyroscope streams
+### Sensor
+- `sensors_plus: ^7.1.1` — stream akselerometer dan giroskop
 
 ### UI
-- `google_fonts: ^8.2.1` — Inter and Cinzel fonts
+- `google_fonts: ^8.2.1` — font Inter dan Cinzel
 
 ### Dev Dependencies
 - `flutter_lints: ^6.0.0`
-- `flutter_launcher_icons: ^0.14.4` — custom launcher icon from `assets/gambar/logo_ramala_icon.png`
+- `flutter_launcher_icons: ^0.14.4` — ikon launcher kustom dari `assets/gambar/logo_ramala_icon.png`
 
 ---
 
-## 4. Directory Structure and Important Files
+## 4. Struktur Direktori dan File Penting
 
 ```
 ramala/
 ├── lib/
-│   ├── main.dart                     # App entry point
+│   ├── main.dart                     # Entry point aplikasi
 │   ├── app.dart                      # RamalaApp (MaterialApp.router)
-│   ├── template.dart                 # ENTIRE design system (1131 lines)
+│   ├── template.dart                 # SELURUH design system (1131+ baris)
 │   ├── core/
-│   │   ├── config/env.dart           # String.fromEnvironment() constants
-│   │   ├── error/app_error.dart      # Error → Indonesian message mapping
-│   │   ├── router/app_router.dart    # GoRouter config + auth redirect
+│   │   ├── config/env.dart           # Konstanta String.fromEnvironment()
+│   │   ├── error/app_error.dart      # Pemetaan Error → pesan Bahasa Indonesia
+│   │   ├── router/app_router.dart    # Konfigurasi GoRouter + redirect auth
 │   │   ├── storage/
-│   │   │   ├── local_db.dart         # sqflite helper (cache, chat, search)
-│   │   │   └── secure_session.dart   # SecureLocalStorage for Supabase session
-│   │   ├── validators/validators.dart # Input validation + sanitization
-│   │   └── widgets/input_sheet.dart  # askInput() bottom sheet helper
+│   │   │   ├── local_db.dart         # Helper sqflite (cache, chat, search)
+│   │   │   └── secure_session.dart   # SecureLocalStorage untuk sesi Supabase
+│   │   ├── validators/validators.dart # Validasi + sanitasi input
+│   │   └── widgets/input_sheet.dart  # Helper bottom sheet askInput()
 │   ├── shell/
 │   │   ├── main_shell.dart           # StatefulNavigationShell + Realtime + bottom nav
-│   │   ├── features_page.dart        # "Fitur" tab — menu launcher for extra features
-│   │   └── placeholder_page.dart     # Unused placeholder (commented out in router)
+│   │   ├── features_page.dart        # Tab "Fitur" — launcher menu untuk fitur tambahan
+│   │   └── placeholder_page.dart     # Placeholder tak terpakai (dikomentari di router)
 │   └── features/
 │       ├── auth/{data,presentation}
-│       ├── chatbot/{data,presentation}
+│       ├── chatbot/{data,presentation}   # Gemini + Groq failsafe
 │       ├── converter/{data,presentation}
 │       ├── feedback/presentation
 │       ├── game/presentation
@@ -124,109 +124,118 @@ ramala/
 │       ├── notification/{data,domain,presentation}
 │       ├── portfolio/{data,presentation}
 │       ├── profile/{data,presentation}
-│       ├── admin/presentation         # Admin-only panel
-│       ├── contoh_struktur/           # Reference template folder (gitkeep only)
-│       ├── trading/                   # Empty (gitkeep only) — trading logic in market feature
-│       └── wallet/                    # Empty (gitkeep only)
-├── docs/                             # 6 documentation files (all in Indonesian)
-├── assets/gambar/                    # Image assets (logo_ramala.png, logo_ramala_icon.png)
+│       ├── topup/{data,presentation}     # Request top up koin user
+│       ├── admin/presentation            # Panel admin (buat market, top up, selesaikan)
+│       ├── contoh_struktur/              # Folder template referensi (hanya gitkeep)
+│       ├── trading/                      # Kosong (hanya gitkeep) — logika trading di fitur market
+│       └── wallet/                       # Kosong (hanya gitkeep)
+├── docs/                             # File dokumentasi (semua dalam Bahasa Indonesia)
+├── assets/gambar/                    # Aset gambar (logo_ramala.png, logo_ramala_icon.png)
 ├── android/
 │   └── app/
-│       ├── build.gradle.kts          # compileSdk=37, coreLibraryDesugaring enabled
+│       ├── build.gradle.kts          # compileSdk=37, coreLibraryDesugaring diaktifkan
 │       └── src/main/
-│           ├── AndroidManifest.xml   # Permissions declared
-│           └── kotlin/.../MainActivity.kt  # extends FlutterFragmentActivity (required for biometric)
+│           ├── AndroidManifest.xml   # Izin yang dideklarasikan
+│           └── kotlin/.../MainActivity.kt  # extends FlutterFragmentActivity (diperlukan untuk biometrik)
 ├── pubspec.yaml
-└── env.json                          # ⚠️ CONTAINS REAL API KEYS — do not commit
+├── supabase/migrations/              # File migrasi SQL Supabase CLI
+│   ├── 001_schema.sql                # Tabel, constraint, trigger, RLS, grant
+│   ├── 001_functions.sql             # Fungsi RPC (trade, admin, ledger, dll.)
+│   ├── 003_topup.sql                 # Tabel & RPC top up koin; set balance awal = 0
+│   └── 007_feedback_admin.sql        # Kolom is_hidden + RPC admin_set_feedback_hidden
+└── env.json                          # ⚠️ BERISI API KEY ASLI — jangan di-commit
 ```
 
-> **Note**: `features/trading/` and `features/wallet/` contain only `.gitkeep` files. Trading logic lives in `features/market/`.
+> **Catatan**: `features/trading/` dan `features/wallet/` hanya berisi file `.gitkeep`. Logika trading ada di `features/market/`.
 
 ---
 
-## 5. Architecture and Application Startup
+## 5. Arsitektur dan Startup Aplikasi
 
-### Startup Sequence (`lib/main.dart`)
+### Urutan Startup (`lib/main.dart`)
 1. `WidgetsFlutterBinding.ensureInitialized()`
-2. `Supabase.initialize(url, anonKey, authOptions: FlutterAuthClientOptions(localStorage: SecureLocalStorage()))` — stores session in Android Keystore
-3. `NotificationService.init()` — registers `flutter_local_notifications` plugin
-4. `Workmanager().initialize(callbackDispatcher)` — registers background isolate entry point
-5. `tz.initializeTimeZones()` — loads timezone database
+2. `Supabase.initialize(url, anonKey, authOptions: FlutterAuthClientOptions(localStorage: SecureLocalStorage()))` — menyimpan sesi di Android Keystore
+3. `NotificationService.init()` — mendaftarkan plugin `flutter_local_notifications`
+4. `Workmanager().initialize(callbackDispatcher)` — mendaftarkan entry point isolate background
+5. `tz.initializeTimeZones()` — memuat database timezone
 6. `runApp(ProviderScope(child: RamalaApp()))`
 
-### Architecture Pattern
-- **Feature-first** structure: `lib/features/<feature>/{data,domain,presentation}/`
-- **Riverpod without codegen**: `FutureProvider.autoDispose`, `FutureProvider.autoDispose.family`, `Provider` — all created manually
-- No use of `freezed`, `json_serializable`, or `build_runner`
-- Models are plain Dart classes with `factory fromMap()` constructors
-- Repositories are plain classes instantiated directly in providers
+### Pola Arsitektur
+- **Feature-first**: `lib/features/<feature>/{data,domain,presentation}/`
+- **Riverpod tanpa codegen**: `FutureProvider.autoDispose`, `FutureProvider.autoDispose.family`, `Provider` — semuanya dibuat secara manual
+- Tidak menggunakan `freezed`, `json_serializable`, atau `build_runner`
+- Model adalah kelas Dart biasa dengan konstruktor `factory fromMap()`
+- Repository adalah kelas biasa yang diinstansiasi langsung di provider
 
 ---
 
-## 6. Navigation and Screen Inventory
+## 6. Navigasi dan Inventaris Layar
 
-### Route Configuration (`lib/core/router/app_router.dart`)
+### Konfigurasi Route (`lib/core/router/app_router.dart`)
 
-**Auth guard**: `_AuthRefresh` listens to `Supabase.instance.client.auth.onAuthStateChange`. The `redirect` function:
-- Unauthenticated → redirects any route to `/login`
-- Authenticated on login/register → redirects to `/pasar`
+**Guard auth**: `_AuthRefresh` mendengarkan `Supabase.instance.client.auth.onAuthStateChange`. Fungsi `redirect`:
+- Belum login → redirect semua route ke `/login`
+- Sudah login di halaman login/register → redirect ke `/pasar`
 
-**Shell routes (5 tabs — bottom nav)**:
-| Tab | Route | Widget | Description |
+**Shell routes (5 tab — bottom nav)**:
+| Tab | Route | Widget | Deskripsi |
 |---|---|---|---|
-| 0 | `/pasar` | `MarketListPage` | Market list with search and filter |
-| 1 | `/portofolio` | `PortfolioPage` | Positions, trade history, balance |
-| 2 | `/fitur` | `FeaturesPage` | Launcher menu for extra features |
-| 3 | `/saran` | `FeedbackPage` | Course feedback form |
-| 4 | `/profil` | `ProfilePage` | User profile, avatar, biometric toggle, logout |
+| 0 | `/pasar` | `MarketListPage` | Daftar market dengan pencarian dan filter kategori termasuk "Semua" |
+| 1 | `/portofolio` | `PortfolioPage` | Posisi, riwayat transaksi, saldo |
+| 2 | `/fitur` | `FeaturesPage` | Menu launcher untuk fitur tambahan |
+| 3 | `/saran` | `FeedbackPage` | Form saran & kesan; admin bisa lihat dan sembunyikan daftar |
+| 4 | `/profil` | `ProfilePage` | Profil user, avatar, biometrik, logout, request top up koin |
 
-**Detail routes (outside shell, full-screen)**:
-| Route | Widget | Notes |
+**Route detail (di luar shell, layar penuh)**:
+| Route | Widget | Catatan |
 |---|---|---|
-| `/login` | `LoginPage` | Auth-gated |
-| `/register` | `RegisterPage` | Auth-gated |
-| `/market/:id` | `MarketDetailPage` | Takes `id` path parameter |
-| `/konverter` | `ConverterPage` | Currency + crypto + time zone |
-| `/nearby` | `NearbyPage` | LBS map + sorted list |
-| `/game` | `GamePage` | Sensor game |
-| `/chatbot` | `ChatPage` | Gemini AI chat |
-| `/notifikasi` | `NotificationPage` | Notification list |
-| `/ledger` | `LedgerPage` | Blockchain ledger |
-| `/admin` | `AdminPage` | Admin-only (no route guard — server RPCs enforce access) |
+| `/login` | `LoginPage` | Dijaga auth |
+| `/register` | `RegisterPage` | Dijaga auth |
+| `/market/:id` | `MarketDetailPage` | Parameter path `id` |
+| `/konverter` | `ConverterPage` | Mata uang + kripto + zona waktu; tab waktu hanya tampilkan market yang masih buka |
+| `/nearby` | `NearbyPage` | Peta LBS + daftar terurut |
+| `/game` | `GamePage` | Game sensor |
+| `/chatbot` | `ChatPage` | Chat AI (Gemini + failsafe Groq); limit input 1000 karakter |
+| `/notifikasi` | `NotificationPage` | Daftar notifikasi |
+| `/ledger` | `LedgerPage` | Ledger blockchain |
+| `/admin` | `AdminPage` | Khusus admin (tanpa guard client — RPC server yang mengontrol akses) |
+| `/admin/market-baru` | `AdminCreateMarketPage` | Buat market baru dengan gambar, pin peta, dan waktu tutup |
+| `/admin/topup` | `AdminTopupPage` | Daftar permintaan top up; terima/tolak |
+| `/admin/selesaikan` | `AdminResolvePage` | Selesaikan market yang berjalan |
 
 ---
 
-## 7. Feature-by-Feature Implementation
+## 7. Implementasi Fitur Per-Fitur
 
-### 7.1 Authentication (`features/auth/`)
+### 7.1 Autentikasi (`features/auth/`)
 
 **Login (`login_page.dart`)**:
-- Email/password form using `Validators.email` and a simpler required check for password
-- Biometric button shown only if `BiometricService.supported && enabled`
-- On biometric login: authenticates → reads stored credentials → calls `AuthRepository.login()`
-- If biometric credentials are invalid (password changed), auto-disables biometric and shows guidance
-- Router redirect handles navigation after successful login
+- Form email/password menggunakan `Validators.email` dan cek required untuk password
+- Tombol biometrik hanya ditampilkan jika `BiometricService.supported && enabled`
+- Saat login biometrik: autentikasi → baca kredensial tersimpan → panggil `AuthRepository.login()`
+- Jika kredensial biometrik tidak valid (password berubah), biometrik dinonaktifkan otomatis dan panduan ditampilkan
+- Redirect router menangani navigasi setelah login berhasil
 
 **Register (`register_page.dart`)**:
-- Username, email, password fields
-- `Validators.username` (3–20 chars, lowercase letters, digits, underscore only)
-- `Validators.password` (8–64 chars, must contain letter AND digit)
-- On success, router redirects automatically; no manual navigation
+- Field username, email, password
+- `Validators.username` (3–20 karakter, huruf kecil, angka, underscore)
+- `Validators.password` (8–64 karakter, harus mengandung huruf DAN angka)
+- Setelah berhasil, router redirect otomatis; tidak ada navigasi manual
 
 **AuthRepository (`auth/data/auth_repository.dart`)**:
 - `login()` → `_auth.signInWithPassword()`
-- `register()` → `_auth.signUp()` with `data: {'username': username}` as user metadata
-- `logout()`: **critical order** — `signOut(scope: SignOutScope.local)` first (no network), then `NotificationService.stopBackground()` and `LocalDb.clear()` as best-effort
+- `register()` → `_auth.signUp()` dengan `data: {'username': username}` sebagai metadata user
+- `logout()`: **urutan kritis** — `signOut(scope: SignOutScope.local)` dulu (tanpa jaringan), lalu `NotificationService.stopBackground()` dan `LocalDb.clear()` sebagai best-effort
 
 **BiometricService (`auth/data/biometric_service.dart`)**:
-- Stores `bio_email` and `bio_pass` in `FlutterSecureStorage` (separate from session token)
-- `authenticate()` uses `biometricOnly: false` → allows PIN/pattern fallback
-- `enabledFor(email)` checks that stored email matches current user to prevent cross-account use
-- Enabling: requires successful `authenticate()` + explicit password confirmation via `AuthRepository.login()`
+- Menyimpan `bio_email` dan `bio_pass` di `FlutterSecureStorage` (terpisah dari token sesi)
+- `authenticate()` menggunakan `biometricOnly: false` → memperbolehkan fallback PIN/pola
+- `enabledFor(email)` memverifikasi bahwa email tersimpan cocok dengan user saat ini
+- Mengaktifkan: membutuhkan `authenticate()` yang berhasil + konfirmasi password eksplisit via `AuthRepository.login()`
 
 ### 7.2 Market (`features/market/`)
 
-**Market model (`domain/market.dart`)**:
+**Model Market (`domain/market.dart`)**:
 ```dart
 class Market {
   final String id, title, category, status;
@@ -236,383 +245,467 @@ class Market {
   bool get isOpen => status == 'open' && closeAt.isAfter(DateTime.now());
 }
 ```
-- `isOpen` is computed client-side using `closeAt` vs current time
-- `MarketStatus.from(status, closeAt)` in `template.dart` adds a `closed` computed state
+- `isOpen` dihitung sisi client menggunakan `closeAt` vs waktu sekarang
+- `MarketStatus.from(status, closeAt)` di `template.dart` menambahkan state `closed` yang dihitung
 
-**Market list (`market_list_page.dart`)**:
-- Active markets sorted by `closeAt` ascending (soonest to close first)
-- Resolved/cancelled markets in a collapsible section, sorted by `closeAt` descending
-- Category filter chips generated dynamically from available categories
-- `AppSearchBar` with 400ms debounce → updates `_q` state → re-watches `marketListProvider(_q)`
-- Offline cache: only when `query.isEmpty` (via `LocalDb.cachedList`)
+**Daftar market (`market_list_page.dart`)**:
+- Market aktif diurutkan berdasarkan `closeAt` naik (yang segera tutup tampil pertama)
+- Market diselesaikan/dibatalkan dalam seksi yang bisa dilipat, diurutkan `closeAt` turun
+- Filter kategori termasuk opsi **"Semua"** di posisi pertama untuk menampilkan semua market
+- Chip filter kategori dibangkitkan secara dinamis dari kategori yang tersedia
+- Jika market memiliki `imageUrl`, gambar ditampilkan sebagai icon mirip Polymarket (persegi, opsional)
+- `AppSearchBar` dengan debounce 400ms → memperbarui state `_q` → memantau ulang `marketListProvider(_q)`
+- Cache offline: hanya ketika `query.isEmpty` (via `LocalDb.cachedList`)
 
 **MarketRepository (`market/data/market_repository.dart`)**:
-- `list(query)`: uses `ilike` with `Validators.likeEscape()` for wildcard safety, limit 100
-- `get(id)`: single market by UUID
-- `history(id)`: last 100 price snapshots from `price_history` (reversed to chronological)
-- `trade()`: calls `trade_market` RPC, returns `amount` from response
+- `list(query)`: menggunakan `ilike` dengan `Validators.likeEscape()` untuk keamanan wildcard, limit 100
+- `get(id)`: market tunggal berdasarkan UUID
+- `history(id)`: 100 snapshot harga terakhir dari `price_history` (dibalik ke urutan kronologis)
+- `trade()`: memanggil RPC `trade_market`, mengembalikan `amount` dari respons
 
-**LMSR pricing (`domain/lmsr.dart`)**:
-- `cost(qy, qn, b)` uses numerically stable log-sum-exp
+**Penetapan harga LMSR (`domain/lmsr.dart`)**:
+- `cost(qy, qn, b)` menggunakan log-sum-exp yang stabil secara numerik
 - `price(qy, qn, b)` = `1 / (1 + e^((qn-qy)/b))`
-- `quote(...)` returns `(amount, priceYes)` — buy rounds up 4 decimals, sell rounds down
-- **Client-side preview only.** Authoritative amount comes from server RPC.
+- `quote(...)` mengembalikan `(amount, priceYes)` — beli dibulatkan ke atas 4 desimal, jual ke bawah
+- **Hanya preview sisi client.** Jumlah otoritatif berasal dari RPC server.
 
-**Trade sheet (`market/presentation/trade_sheet.dart`)**:
-- Selects Beli/Jual and YES/NO via `AppSegmented`
-- `AppAmountStepper` for share count (1–1000, step 1)
-- Client validation: disables submit button if balance or shares insufficient
-- After successful trade: invalidates `marketProvider`, `priceHistoryProvider`, `marketListProvider`, `portfolioProvider`, `tradesProvider`, `balanceProvider`
+**Sheet trading (`market/presentation/trade_sheet.dart`)**:
+- Memilih Beli/Jual dan YES/NO via `AppSegmented`
+- Input jumlah share menggunakan `AppTextField` dengan angka langsung (bukan hanya tombol +/-)
+- Chip cepat tersedia: 10, 50, 100, 500 share; chip "Maks" untuk mode jual
+- Validasi ketat: regex `^\d{0,4}([.,]\d{0,2})?$`, min 0,01, maks 1000; pesan error inline
+- Tombol submit dinonaktifkan jika saldo tidak cukup, share kurang, atau input tidak valid
+- Setelah transaksi berhasil: invalidasi `marketProvider`, `priceHistoryProvider`, `marketListProvider`, `portfolioProvider`, `tradesProvider`, `balanceProvider`
 
-### 7.3 Portfolio (`features/portfolio/`)
+### 7.3 Portofolio (`features/portfolio/`)
 
-**PortfolioPosition model** (defined in `portfolio_repository.dart`):
-- Holds reference to full `Market` object (joined in query)
+**Model PortfolioPosition** (didefinisikan di `portfolio_repository.dart`):
+- Menyimpan referensi ke objek `Market` lengkap (di-join dalam query)
 - `value` = `shares × (priceYes if side=yes, else 1-priceYes)`
-- `unrealized` = `value - cost` (only when shares > 0)
-- Positions with `shares == 0` included for realized PnL calculation
+- `unrealized` = `value - cost` (hanya jika shares > 0)
+- Posisi dengan `shares == 0` disertakan untuk kalkulasi PnL terealisasi
 
 **PortfolioRepository**:
-- `positions()`: joins `markets` table with all market columns
-- `trades()`: last 20 trades hardcoded limit
+- `positions()`: join tabel `markets` dengan semua kolom market
+- `trades()`: 20 transaksi terakhir (limit hardcoded)
 
-### 7.4 Profile (`features/profile/`)
+### 7.4 Profil (`features/profile/`)
 
 **ProfileRepository**:
-- `_uid` getter throws `AuthException('not_authenticated')` if `currentUser == null` — prevents crash on logout race
-- `update()`: partial update, only sends non-null fields
-- `avatarUrl` restricted to `https://res.cloudinary.com/` prefix by server constraint
+- Getter `_uid` melempar `AuthException('not_authenticated')` jika `currentUser == null` — mencegah crash saat race condition logout
+- `update()`: update parsial, hanya mengirim field yang tidak null
+- `avatarUrl` dibatasi prefix `https://res.cloudinary.com/` oleh constraint server
 
-**Profile page (`profile_page.dart`)**:
-- Avatar upload: `ImagePicker → CloudinaryService.uploadAvatar → ProfileRepository.update`
-- Name editing: via `askInput()` bottom sheet
-- Biometric toggle: enables after re-authenticating + password confirmation; disables after confirmation
-- Admin users see "Panel admin" → `/admin`
-- Logout: confirmation dialog → `AuthRepository.logout()` → `GoRouter.go('/login')`
+**Halaman profil (`profile_page.dart`)**:
+- Upload avatar: `ImagePicker → CloudinaryService.uploadAvatar → ProfileRepository.update`
+- Edit nama: via bottom sheet `askInput()`
+- Toggle biometrik: aktifkan setelah autentikasi ulang + konfirmasi password; nonaktifkan setelah konfirmasi
+- Admin melihat "Panel admin" → `/admin`
+- Menu **"Request Top Up Koin"** → menampilkan form di mana user bisa input jumlah (validasi angka, max 1.000.000 koin); satu request pending per user
+- Logout: dialog konfirmasi → `AuthRepository.logout()` → `GoRouter.go('/login')`
 
 **CloudinaryService**:
-- Compresses to JPEG 512×512 min, 80% quality
-- Rejects if compressed size > 3MB (`FormatException('image')`)
+- Kompresi ke JPEG 512×512 min, kualitas 80%
+- Tolak jika ukuran terkompresi > 3MB (`FormatException('image')`)
 
-### 7.5 Notifications (`features/notification/`)
+### 7.5 Top Up Koin (`features/topup/`)
 
-**Three-layer notification system**:
-1. **Realtime (foreground)**: `MainShell._start()` subscribes to Supabase Realtime `notif_<uid>` channel. On INSERT in `notifications` table → `NotificationService.show()` + invalidate `notificationsProvider`.
-2. **Background polling**: Workmanager periodic task (min 15 min), re-initializes Supabase in isolate, calls `NotificationService.pollBackground()`.
-3. **Deduplication**: `notif_last` in `FlutterSecureStorage` — only newer notifications shown.
+**Alur top up**:
+1. User mengajukan permintaan melalui menu di halaman profil → RPC `request_topup(p_amount)`
+2. Satu user hanya boleh punya **satu permintaan pending** (unique index di database)
+3. Admin melihat daftar permintaan di `/admin/topup` → terima atau tolak
+4. Saat **disetujui**: balance user bertambah, entri ledger dibuat, notifikasi dikirim ke user
+5. Saat **ditolak**: notifikasi dikirim ke user; saldo tidak berubah
+6. Request yang sudah selesai (approved/rejected) **tidak lagi tampil** di daftar admin
 
-**AppNotification model** contains `marketId` from `data->>'market_id'` JSONB — used for notification tap navigation.
+**Validasi**:
+- Jumlah minimum: 1 koin
+- Jumlah maksimum: 1.000.000 koin (dijaga di client DAN di RPC server)
+- Harus angka positif (validasi di Flutter + constraint `check` di database)
 
-### 7.6 Chatbot (`features/chatbot/`)
+**Catatan database**: Migrasi `003_topup.sql` mengubah `default balance = 0` pada tabel `wallets` — **user baru tidak lagi otomatis mendapat 1000 koin**.
 
-**GeminiService**:
-- Model: `gemini-3.8-flash` (⚠️ verify this exists)
-- System prompt: Bahasa Indonesia, max 120 words, no real investment advice, explains LMSR
-- Injects up to 10 active markets with YES prices as context
+### 7.6 Notifikasi (`features/notification/`)
+
+**Sistem notifikasi tiga lapis**:
+1. **Realtime (foreground)**: `MainShell._start()` berlangganan ke channel Supabase Realtime `notif_<uid>`. Saat INSERT di tabel `notifications` → `NotificationService.show()` + invalidasi `notificationsProvider`.
+2. **Polling background**: Task periodik Workmanager (min 15 menit), reinisialisasi Supabase di isolate, memanggil `NotificationService.pollBackground()`.
+3. **Deduplikasi**: `notif_last` di `FlutterSecureStorage` — hanya notifikasi yang lebih baru yang ditampilkan.
+
+**Model AppNotification** berisi `marketId` dari `data->>'market_id'` JSONB — digunakan untuk navigasi saat notifikasi diketuk.
+
+### 7.7 Chatbot (`features/chatbot/`)
+
+**Arsitektur dual AI dengan failsafe**:
+- `AiChatService` (`chatbot/data/ai_chat_service.dart`) adalah fasad tunggal yang dipanggil `ChatPage`
+- **Urutan**: Coba Gemini terlebih dahulu → jika gagal (error apapun), fallback ke Groq
+- Jika Gemini error/sibuk, UI tetap loading sementara request dipindahkan ke Groq
+- Jika hanya Groq yang tersedia (Gemini key kosong), Groq digunakan langsung
+
+**GeminiService (`chatbot/data/gemini_service.dart`)**:
+- Model: `gemini-2.0-flash` (verifikasi nama model sebelum digunakan)
+- System prompt: Bahasa Indonesia, maks 120 kata, tanpa nasihat investasi nyata, menjelaskan LMSR
+- Menyuntikkan hingga 10 market aktif dengan harga YES sebagai konteks
 - `maxOutputTokens: 600`, `temperature: 0.7`, `thinkingBudget: 0`
 
-**ChatPage**:
-- Rate limit: 15 messages per 10-minute rolling window (client-side)
-- History window: last 10 messages sent to Gemini
-- Chat history persisted in sqflite
-- `maxLength: 300` for input
-- No retry logic — errors displayed via `AppToast`
+**GroqService (`chatbot/data/groq_service.dart`)**:
+- Model: `openai/gpt-oss-20b`
+- Endpoint: `https://api.groq.com/openai/v1/chat/completions`
+- `max_completion_tokens: 1000`, `reasoning_effort: 'low'`, `temperature: 0.7`
+- Format history: role `model` dikonversi ke `assistant` untuk API OpenAI-compatible
 
-### 7.7 Converter (`features/converter/`)
+**ChatPage (`chatbot/presentation/chat_page.dart`)**:
+- Rate limit: 15 pesan per jendela rolling 10 menit (sisi client)
+- Jendela riwayat: 10 pesan terakhir dikirim ke AI
+- Riwayat chat disimpan di sqflite
+- **`maxLength: 1000` karakter** untuk input (batas prompt per pesan)
+- Tidak ada logika retry — error ditampilkan via `AppToast`
+- Kedua API key dikonfigurasi di `env.json`: `GEMINI_API_KEY` dan `GROQ_API_KEY`
 
-**Three tabs**: Fiat, Crypto, Time
+### 7.8 Konverter (`features/converter/`)
 
-- **Fiat**: `open.er-api.com`, 5 currencies + KOIN (1 KOIN = 1 USD dummy), cache 1 hour
-- **Crypto**: CoinGecko, BTC/ETH/SOL vs USD + IDR, cache 2 minutes
-- **Time zones**: WIB, WITA, WIT, London using `timezone` package
-- Time zone tab can use market `closeAt` as the time to convert
+**Tiga tab**: Fiat, Kripto, Waktu
 
-### 7.8 Nearby / LBS (`features/nearby/`)
+- **Fiat**: `open.er-api.com`, 5 mata uang + KOIN (1 KOIN = 1 USD dummy), cache 1 jam
+- **Kripto**: CoinGecko, BTC/ETH/SOL vs USD + IDR, cache 2 menit
+- **Zona Waktu**: WIB, WITA, WIT, London menggunakan paket `timezone`
+- Tab zona waktu bisa menggunakan `closeAt` market sebagai waktu yang dikonversi
+- **Market yang sudah tutup atau selesai TIDAK ditampilkan** dalam daftar pilihan market di tab zona waktu
 
-- Requests GPS via `geolocator`
-- Fetches open markets with non-null `latitude`/`longitude`
-- Calculates and sorts by distance client-side
-- Map: `flutter_map` with OpenStreetMap tiles
-- `userAgentPackageName: 'com.example.ramala'` must match `applicationId`
+### 7.9 Nearby / LBS (`features/nearby/`)
 
-### 7.9 Game — "Tebak Arah" (`features/game/`)
+- Meminta GPS via `geolocator`
+- Mengambil market terbuka dengan `latitude`/`longitude` yang tidak null
+- Menghitung dan mengurutkan berdasarkan jarak sisi client
+- Peta: `flutter_map` dengan tile OpenStreetMap
+- `userAgentPackageName: 'com.example.ramala'` harus cocok dengan `applicationId`
 
-- 10 rounds, 3 seconds each
-- Directions: kiri, kanan, maju, mundur, putar (5 options)
-- **Accelerometer**: ±5 m/s² threshold on X/Y axis
-- **Gyroscope**: `|z| > 5` rad/s for rotation
-- Scoring: 100 base + speed bonus per correct answer
-- 400ms debounce prevents carry-over from previous gesture
-- Scores saved to `game_scores` table; leaderboard shows top 10
+### 7.10 Game — "Tebak Arah" (`features/game/`)
 
-### 7.10 Blockchain Ledger (`features/ledger/`)
+- 10 ronde, masing-masing 3 detik
+- Arah: kiri, kanan, maju, mundur, putar (5 pilihan)
+- **Akselerometer**: threshold ±5 m/s² pada sumbu X/Y
+- **Giroskop**: `|z| > 5` rad/s untuk rotasi
+- Skor: 100 dasar + bonus kecepatan per jawaban benar
+- Debounce 400ms mencegah carry-over dari gestur sebelumnya
+- Skor disimpan ke tabel `game_scores`; leaderboard menampilkan top 10
 
-- Reads last 50 entries from `ledger` table
-- `hash = SHA-256("<idx>|<prev_hash>|<data>")` computed in Postgres
-- "Verifikasi rantai" button calls `verify_ledger()` RPC → returns corrupted `idx` or null
-- Corrupted blocks highlighted with red border (`AppCard(borderColor: AppColors.no)`)
+### 7.11 Ledger Blockchain (`features/ledger/`)
 
-### 7.11 Admin Panel (`features/admin/`)
+- Membaca 50 entri terakhir dari tabel `ledger`
+- `hash = SHA-256("<idx>|<prev_hash>|<data>")` dihitung di Postgres
+- Tombol "Verifikasi rantai" memanggil RPC `verify_ledger()` → mengembalikan `idx` yang rusak atau null
+- Blok yang rusak disorot dengan border merah (`AppCard(borderColor: AppColors.no)`)
 
-- **No client-side route guard** — security enforced by Supabase RPCs
-- Create market: fields for title, description, category, b parameter, optional lat/lng, close datetime
-- Calls `admin_create_market` RPC directly (no repository layer)
-- Resolve market: shows open markets → YES/NO choice → confirmation → `admin_resolve_market` RPC
-- **⚠️ `p_image_url` parameter is in the RPC signature but NOT in the admin form**
+### 7.12 Panel Admin (`features/admin/`)
 
-### 7.12 Feedback (`features/feedback/`)
+**Tidak ada guard route sisi client** — keamanan ditegakkan oleh RPC Supabase.
 
-- Star rating 1–5 (required), impression + suggestion fields (min 5, max 500 chars)
-- Inserts into `feedback` table directly (no repository layer)
+`AdminPage` berfungsi sebagai dashboard dengan tiga menu:
+
+**a. Buat Market (`/admin/market-baru` → `AdminCreateMarketPage`)**:
+- Field: judul, deskripsi, kategori, parameter b, waktu tutup (date+time picker)
+- **Upload gambar** (`image_picker` → validasi persegi toleransi 2%, min 200px → `MarketImageService.upload()` → Cloudinary → URL disimpan via RPC)
+- **Drop pin lokasi**: tombol membuka `PinPickerPage` (flutter_map) untuk memilih koordinat lat/lng secara visual; tidak memerlukan dependency baru
+- Memanggil RPC `admin_create_market`; invalidasi `marketListProvider` dan `categoriesProvider`
+
+**b. Permintaan Top Up (`/admin/topup` → `AdminTopupPage`)**:
+- Menampilkan daftar semua permintaan pending beserta nama user atau detail usernya
+- Tombol **Terima** → memanggil RPC `admin_approve_topup(p_id)`: balance user bertambah + notifikasi dikirim
+- Tombol **Tolak** → memanggil RPC `admin_reject_topup(p_id)`: notifikasi penolakan dikirim
+- Request yang sudah diselesaikan (approved/rejected) **dihapus dari daftar** secara otomatis (tidak ditampilkan lagi)
+- Badge jumlah pending ditampilkan di halaman admin utama
+
+**c. Selesaikan Market (`/admin/selesaikan` → `AdminResolvePage`)**:
+- Menampilkan market yang berstatus open untuk diselesaikan
+- Pilihan hasil YES/NO → dialog konfirmasi → RPC `admin_resolve_market(p_market, p_outcome)`
+
+### 7.13 Saran & Kesan (`features/feedback/`)
+
+- Rating bintang 1–5 (wajib), field kesan + saran (min 5, maks 500 karakter)
+- Insert ke tabel `feedback` langsung (tanpa layer repository)
+- **Hak istimewa admin**:
+  - Admin dapat melihat daftar semua saran & kesan yang dikirim pengguna (di bawah form input)
+  - Admin dapat menyembunyikan/menampilkan kembali entri feedback via RPC `admin_set_feedback_hidden(p_id, p_hidden)`
+  - Kebijakan RLS `feedback_admin_select` memastikan hanya admin yang bisa membaca semua feedback
+  - Kolom `is_hidden` di tabel `feedback` ditambahkan via migrasi `007_feedback_admin.sql`
 
 ---
 
-## 8. State Management and Data Flow
+## 8. State Management dan Alur Data
 
-### Riverpod Providers
+### Provider Riverpod
 
-All providers: `FutureProvider.autoDispose` with `retry: (_, __) => null` (no auto-retry).
+Semua provider: `FutureProvider.autoDispose` dengan `retry: (_, __) => null` (tanpa auto-retry).
 
-| Provider | Location | Notes |
+| Provider | Lokasi | Catatan |
 |---|---|---|
-| `routerProvider` | `core/router/app_router.dart` | Includes `_AuthRefresh` auth listenable |
-| `marketListProvider(q)` | `market/presentation/market_providers.dart` | Family by search query |
-| `marketProvider(id)` | same | Family by market UUID |
-| `priceHistoryProvider(id)` | same | Family by market UUID |
+| `routerProvider` | `core/router/app_router.dart` | Termasuk listenable auth `_AuthRefresh` |
+| `marketListProvider(q)` | `market/presentation/market_providers.dart` | Family berdasarkan query pencarian |
+| `marketProvider(id)` | sama | Family berdasarkan UUID market |
+| `priceHistoryProvider(id)` | sama | Family berdasarkan UUID market |
+| `categoriesProvider` | `market/presentation/market_providers.dart` | Daftar kategori unik + "semua" |
 | `portfolioProvider` | `portfolio/presentation/portfolio_providers.dart` | |
-| `tradesProvider` | same | |
+| `tradesProvider` | sama | |
 | `profileProvider` | `profile/presentation/profile_providers.dart` | |
-| `balanceProvider` | same | |
-| `notificationsProvider` | `notification/presentation/notification_page.dart` | Also invalidated by Realtime in `MainShell` |
-| `ledgerProvider` | `ledger/presentation/ledger_page.dart` | Defined inline |
-| `_boardProvider` | `game/presentation/game_page.dart` | Defined inline |
-| `_fiatProvider`, `_cryptoProvider` | `converter/presentation/converter_page.dart` | Defined inline |
-| `_nearbyProvider` | `nearby/presentation/nearby_page.dart` | Returns named record |
+| `balanceProvider` | sama | |
+| `notificationsProvider` | `notification/presentation/notification_page.dart` | Juga diinvalidasi oleh Realtime di `MainShell` |
+| `pendingTopupsProvider` | `admin/presentation/admin_topup_page.dart` | Daftar pending top up untuk admin |
+| `ledgerProvider` | `ledger/presentation/ledger_page.dart` | Didefinisikan inline |
+| `_boardProvider` | `game/presentation/game_page.dart` | Didefinisikan inline |
+| `_fiatProvider`, `_cryptoProvider` | `converter/presentation/converter_page.dart` | Didefinisikan inline |
+| `_nearbyProvider` | `nearby/presentation/nearby_page.dart` | Mengembalikan named record |
 
-### Cache Strategy
+### Strategi Cache
 
-`LocalDb.cachedList(key, fetch)` — network-first, falls back to cache only for network errors. Supabase errors are NOT cached-over — re-thrown. All cache cleared on logout.
+`LocalDb.cachedList(key, fetch)` — network-first, fallback ke cache hanya untuk error jaringan. Error Supabase TIDAK di-cache — dilempar ulang. Semua cache dihapus saat logout.
 
 Cache keys: `markets:list`, `portfolio:<uid>`, `notif:<uid>`, `rates:fiat`, `rates:crypto`
 
 ---
 
-## 9. Data Models, Persistence, and External Services
+## 9. Model Data, Persistensi, dan Layanan Eksternal
 
-### Supabase Database Tables
+### Tabel Database Supabase
 
-| Table | Key Columns | Client Access |
+| Tabel | Kolom Utama | Akses Client |
 |---|---|---|
-| `profiles` | `id, username, display_name, avatar_url, role, created_at` | SELECT all; UPDATE `username, display_name, avatar_url` |
-| `wallets` | `user_id, balance` | SELECT own |
-| `markets` | `id, title, description, category, image_url, latitude, longitude, close_at, status, outcome, b, q_yes, q_no, price_yes, volume, created_by, created_at, resolved_at` | SELECT all |
-| `positions` | `user_id, market_id, side, shares, cost, realized_pnl` | SELECT own |
-| `trades` | `id, user_id, market_id, side, action, shares, amount, price_yes_after, created_at` | SELECT own |
+| `profiles` | `id, username, display_name, avatar_url, role, created_at` | SELECT semua; UPDATE `username, display_name, avatar_url` |
+| `wallets` | `user_id, balance` (default **0** sejak migrasi 003) | SELECT milik sendiri |
+| `markets` | `id, title, description, category, image_url, latitude, longitude, close_at, status, outcome, b, q_yes, q_no, price_yes, volume, created_by, created_at, resolved_at` | SELECT semua |
+| `positions` | `user_id, market_id, side, shares, cost, realized_pnl` | SELECT milik sendiri |
+| `trades` | `id, user_id, market_id, side, action, shares, amount, price_yes_after, created_at` | SELECT milik sendiri |
 | `price_history` | `market_id, price_yes, created_at` | SELECT |
-| `ledger` | `idx, prev_hash, data, hash, created_at` | SELECT only |
-| `notifications` | `id, user_id, type, title, body, data (JSONB), is_read, created_at` | SELECT own; UPDATE `is_read` |
-| `feedback` | `impression, suggestion, rating` | INSERT |
+| `ledger` | `idx, prev_hash, data, hash, created_at` | SELECT saja |
+| `notifications` | `id, user_id, type, title, body, data (JSONB), is_read, created_at` | SELECT milik sendiri; UPDATE `is_read` |
+| `feedback` | `id, user_id, impression, suggestion, rating, is_hidden, created_at` | INSERT milik sendiri; SELECT semua (admin saja via RLS) |
 | `game_scores` | `game, score, user_id, created_at` | INSERT; SELECT |
+| `topup_requests` | `id, user_id, amount, status, created_at, resolved_at, resolved_by` | SELECT milik sendiri atau admin |
 
-### Supabase RPCs
+### RPC Supabase
 
-| RPC | Parameters | Returns |
+| RPC | Parameter | Mengembalikan |
 |---|---|---|
 | `trade_market` | `p_market uuid, p_side, p_action, p_shares numeric 0.01–1000` | `{trade_id, shares, amount, price_yes, balance}` |
 | `admin_create_market` | `p_title, p_close_at, p_description, p_category, p_b, p_image_url?, p_lat?, p_lng?` | uuid |
 | `admin_resolve_market` | `p_market uuid, p_outcome 'yes'\|'no'` | void |
-| `verify_ledger` | none | `int?` (corrupted idx) or null |
-| `is_admin` | none | bool |
+| `verify_ledger` | tidak ada | `int?` (idx yang rusak) atau null |
+| `is_admin` | tidak ada | bool |
+| `request_topup` | `p_amount integer` | uuid (ID request) |
+| `admin_approve_topup` | `p_id uuid` | void |
+| `admin_reject_topup` | `p_id uuid` | void |
+| `admin_set_feedback_hidden` | `p_id uuid, p_hidden boolean` | void |
 
-### sqflite Tables (`ramala.db`)
+### Tabel sqflite (`ramala.db`)
 
 1. `cache(key TEXT PK, json TEXT, updated_at INTEGER)`
 2. `chat_messages(id INTEGER AUTOINCREMENT PK, role TEXT, content TEXT, created_at INTEGER)`
-3. `search_history(query TEXT PK, used_at INTEGER)` — structure exists, not actively used in UI
+3. `search_history(query TEXT PK, used_at INTEGER)` — struktur ada, belum digunakan aktif di UI
 
 ---
 
-## 10. UI Conventions and Design System
+## 10. Konvensi UI dan Design System
 
-**Single file**: `lib/template.dart` — imported by ALL pages as `import 'package:ramala/template.dart'`.
+**File tunggal**: `lib/template.dart` — diimpor oleh SEMUA halaman sebagai `import 'package:ramala/template.dart'`.
 
-**Design concept**: "séance / crystal ball" — deep dark purple-black with orange-pumpkin accents.
+**Konsep desain**: "séance / crystal ball" — ungu gelap kehitaman dengan aksen oranye-labu.
 
-### Color System (`AppColors`)
+### Sistem Warna (`AppColors`)
 
-| Name | Hex | Use |
+| Nama | Hex | Penggunaan |
 |---|---|---|
-| `bg` | `#0B0710` | Page background |
-| `surface` | `#150E1C` | Inputs, nav bar, bottom sheets |
-| `card` | `#1E1428` | Card backgrounds |
-| `border` | `#2E2140` | Borders |
-| `primary` | `#FF7A1A` | Actions, brand (orange) |
-| `accent` | `#FFC24A` | Coin values, highlights (amber) |
-| `arcane` | `#8B5CF6` | Info, empty states (purple) |
-| `yes` | `#7EE08A` | YES direction, profit (green) |
-| `no` | `#F0455A` | NO direction, loss, errors (red) |
+| `bg` | `#0B0710` | Latar halaman |
+| `surface` | `#150E1C` | Input, nav bar, bottom sheet |
+| `card` | `#1E1428` | Latar kartu |
+| `border` | `#2E2140` | Border |
+| `primary` | `#FF7A1A` | Aksi, brand (oranye) |
+| `accent` | `#FFC24A` | Nilai koin, highlight (amber) |
+| `arcane` | `#8B5CF6` | Info, empty state (ungu) |
+| `yes` | `#7EE08A` | Arah YES, keuntungan (hijau) |
+| `no` | `#F0455A` | Arah NO, kerugian, error (merah) |
 
-### Typography (`AppText`)
+### Tipografi (`AppText`)
 
-- **Cinzel**: `display` (28px bold), `title` (20px bold) — page titles, logo
-- **Inter**: all other styles — `heading`, `body`, `bodyDim`, `label`, `caption`, `number`, `numberSm`
-- Numbers use tabular figures (`FontFeature.tabularFigures()`)
+- **Cinzel**: `display` (28px bold), `title` (20px bold) — judul halaman, logo
+- **Inter**: semua gaya lainnya — `heading`, `body`, `bodyDim`, `label`, `caption`, `number`, `numberSm`
+- Angka menggunakan tabular figures (`FontFeature.tabularFigures()`)
 
-### Spacing and Radius
+### Jarak dan Radius
 
 - `AppSpace`: xs=4, sm=8, md=12, lg=16, xl=24, xxl=32
 - `AppRadius`: sm=8, md=12, lg=16, xl=24, pill=999
 
-### Key Widget Rules
+### Aturan Widget Utama
 
-1. Every page uses `AppScaffold`. `children:` for scrollable; `body:` for custom layouts.
-2. Loading: `AppSkeleton` for placeholders; `AppLoading` for spinners.
-3. States: `EmptyState` (no data), `ErrorState` (always include `onRetry`).
+1. Setiap halaman menggunakan `AppScaffold`. `children:` untuk scrollable; `body:` untuk layout kustom.
+2. Loading: `AppSkeleton` untuk placeholder; `AppLoading` untuk spinner.
+3. State: `EmptyState` (tidak ada data), `ErrorState` (selalu sertakan `onRetry`).
 4. Feedback: `AppToast.show(context, message, type: ToastType.*)`.
-5. Risky actions: `AppConfirmDialog.show(context, ...)` returns `Future<bool>`.
-6. Bottom panels: `AppBottomSheet.show<T>(context, title, child)` returns `Future<T?>`.
-7. **Only one glowing card (`AppCard(glow: true)`) per screen**.
-8. **Only one primary `AppButton` per screen/panel**.
-9. `AppNavItem(icon, label, [activeIcon])` — **positional constructor**.
-10. `MarketStatus.from(status, closeAt)` — always use this, not raw `status` string.
+5. Aksi berisiko: `AppConfirmDialog.show(context, ...)` mengembalikan `Future<bool>`.
+6. Panel bawah: `AppBottomSheet.show<T>(context, title, child)` mengembalikan `Future<T?>`.
+7. **Hanya satu kartu bercahaya (`AppCard(glow: true)`) per layar**.
+8. **Hanya satu `AppButton` primary per layar/panel**.
+9. `AppNavItem(icon, label, [activeIcon])` — **konstruktor positional**.
+10. `MarketStatus.from(status, closeAt)` — selalu gunakan ini, bukan string `status` mentah.
 
 ---
 
-## 11. Validation and Error Handling
+## 11. Validasi dan Penanganan Error
 
-### Client-side Validation
+### Validasi Sisi Client
 
-| Validator | Rules |
+| Validator | Aturan |
 |---|---|
-| `Validators.clean(s)` | Trim + remove control characters |
-| `Validators.email(v)` | Required, max 100 chars, basic format regex |
-| `Validators.password(v)` | 8–64 chars, must contain letter AND digit |
+| `Validators.clean(s)` | Trim + hapus karakter kontrol |
+| `Validators.email(v)` | Wajib, maks 100 karakter, regex format dasar |
+| `Validators.password(v)` | 8–64 karakter, harus mengandung huruf DAN angka |
 | `Validators.username(v)` | `^[a-z0-9_]{3,20}$` |
-| `Validators.displayName(v)` | Required, max 40 chars |
+| `Validators.displayName(v)` | Wajib, maks 40 karakter |
 | `Validators.required(v, {min, max})` | min=1 (default), max=500 (default) |
-| `Validators.searchTerm(s)` | Clean + truncate to 60 chars |
-| `Validators.likeEscape(s)` | Escapes `\`, `%`, `_` for `ilike` queries |
+| `Validators.searchTerm(s)` | Clean + potong ke 60 karakter |
+| `Validators.likeEscape(s)` | Escape `\`, `%`, `_` untuk query `ilike` |
 
-### Error Mapping (`AppError.message(Object e)`)
+### Pemetaan Error (`AppError.message(Object e)`)
 
-Maps `SocketException`, `AuthException` (by code), `PostgrestException` (by RPC error code), `DioException` (by HTTP status) to Indonesian messages. Raw server messages are never shown.
+Memetakan `SocketException`, `AuthException` (berdasarkan kode), `PostgrestException` (berdasarkan kode error RPC), `DioException` (berdasarkan status HTTP) ke pesan Bahasa Indonesia. Pesan server mentah tidak pernah ditampilkan.
 
 ---
 
-## 12. Configuration, Testing, and Build Instructions
+## 12. Konfigurasi, Pengujian, dan Instruksi Build
 
-### Running
+### Menjalankan Aplikasi
 
 ```bash
 flutter pub get
-# Create env.json at project root with:
-# SUPABASE_URL, SUPABASE_ANON_KEY, CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET, GEMINI_API_KEY
+# Buat env.json di root proyek dengan:
+# SUPABASE_URL, SUPABASE_ANON_KEY, CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET,
+# GEMINI_API_KEY, GROQ_API_KEY
 flutter run --dart-define-from-file=env.json
 ```
 
-### Key Notes
+### env.json — Struktur Key yang Dibutuhkan
 
-- Changes to `env.json`, `AndroidManifest.xml`, or Gradle require **full stop + restart**
-- Game sensor and GPS require a **physical device**
-- Admin access: SQL Editor on Supabase: `UPDATE public.profiles SET role = 'admin' WHERE username = 'name';`
+```json
+{
+  "SUPABASE_URL": "https://<project>.supabase.co",
+  "SUPABASE_ANON_KEY": "...",
+  "CLOUDINARY_CLOUD_NAME": "...",
+  "CLOUDINARY_UPLOAD_PRESET": "...",
+  "GEMINI_API_KEY": "...",
+  "GROQ_API_KEY": "..."
+}
+```
 
-### Build Config
+> ⚠️ Jangan tambahkan trailing slash pada `SUPABASE_URL`.
+
+### Catatan Penting
+
+- Perubahan pada `env.json`, `AndroidManifest.xml`, atau Gradle memerlukan **stop penuh + restart**
+- Sensor game dan GPS membutuhkan **perangkat fisik**
+- Akses admin: di SQL Editor Supabase: `UPDATE public.profiles SET role = 'admin' WHERE username = 'nama';`
+
+### Konfigurasi Build
 
 - `compileSdk = 37`, `minSdk = flutter.minSdkVersion`
-- `isCoreLibraryDesugaringEnabled = true` (required for timezone)
-- Release build uses debug signing key — replace before production
-- `MainActivity.kt` extends `FlutterFragmentActivity` (required for `local_auth`)
+- `isCoreLibraryDesugaringEnabled = true` (diperlukan untuk timezone)
+- Release build menggunakan debug signing key — ganti sebelum produksi
+- `MainActivity.kt` extends `FlutterFragmentActivity` (diperlukan untuk `local_auth`)
 
 ---
 
-## 13. Known Issues, Incomplete Work, and Technical Debt
+## 13. Masalah yang Diketahui, Pekerjaan Belum Selesai, dan Hutang Teknis
 
-1. **Gemini model `gemini-3.8-flash`**: Likely invalid model name — verify against Gemini API docs before relying on chatbot
-2. **`env.json` is in the repo with real keys** — significant security risk
-3. **Admin route has no client-side guard** — any authenticated user can navigate to `/admin`; server RPCs enforce access
-4. **`p_image_url` missing from admin form** — RPC supports it but UI doesn't expose the field
-5. **`features/trading/` and `features/wallet/`** — empty placeholder folders
-6. **`search_history` table** — exists in sqflite but no autocomplete UI reads it
-7. **`PortfolioRepository.trades()` limit 20** and **`MarketRepository.list()` limit 100** — no pagination
-8. **Logout race condition** — may reappear after hot reload; use full restart
-9. **Release signing** — uses debug keystore
-10. **Background notifications not fully tested** — only "after resolve" notification confirmed working
-11. **Trailing slash in `SUPABASE_URL`** in `env.json` — remove trailing slash per `catatan_rencana.md` guidance
+1. **Nama model Gemini**: Verifikasi nama model `gemini-2.0-flash` terhadap dokumentasi API Gemini sebelum mengandalkan chatbot
+2. **`env.json` berisi key asli** — risiko keamanan signifikan; jangan di-commit ke repository publik
+3. **Route admin tanpa guard sisi client** — pengguna terotentikasi manapun bisa navigasi ke `/admin`; RPC server yang mengontrol akses
+4. **`features/trading/` dan `features/wallet/`** — folder placeholder kosong
+5. **Tabel `search_history`** — ada di sqflite tapi tidak ada UI autocomplete yang membacanya
+6. **Limit `PortfolioRepository.trades()` 20** dan **`MarketRepository.list()` 100** — tidak ada paginasi
+7. **Race condition logout** — bisa muncul kembali setelah hot reload; gunakan restart penuh
+8. **Signing release** — menggunakan keystore debug
+9. **Notifikasi background belum diuji sepenuhnya** — hanya notifikasi "setelah market diselesaikan" yang terkonfirmasi berfungsi
+10. **Workmanager di HP OEM** — task background bisa tertunda jauh lebih dari 15 menit di mode hemat baterai
 
 ---
 
-## 14. Documentation-versus-Code Discrepancies
+## 14. Ketidaksesuaian Dokumentasi vs Kode
 
-| Documentation claim | Code reality |
+| Klaim dokumentasi | Kenyataan kode |
 |---|---|
-| `catatan_rencana.md`: hash computed in client (`crypto` package) | `verify_ledger()` RPC does all computation server-side; `crypto` package imported but not used for ledger |
-| `catatan_rencana.md`: retry 2× with delays for chatbot | Not implemented; `GeminiService` has no retry logic |
-| `prompt_context.md`: `admin_create_market` includes `p_image_url` | `AdminPage._create()` never passes `p_image_url` — field missing from form |
-| `struktur_folder_sementara.txt`: nested state widget folders under `core/widgets/` | Only `input_sheet.dart` exists; nested folders do not exist |
-| `koteks_percakapan_pengerjaan_mvp.md`: retry 2×/delays for 503/429 | Not implemented in current code |
+| `catatan_rencana.md`: hash dihitung di client (paket `crypto`) | RPC `verify_ledger()` melakukan semua komputasi sisi server; paket `crypto` diimpor tapi tidak digunakan untuk ledger |
+| `catatan_rencana.md`: retry 2× dengan delay untuk chatbot | Tidak diimplementasikan; `GeminiService` tidak memiliki logika retry (digantikan oleh failsafe Groq) |
+| `koteks_percakapan_pengerjaan_mvp.md`: retry 2×/delay untuk 503/429 | Tidak diimplementasikan di kode saat ini |
 
 ---
 
-## 15. Constraints and Instructions for Future AI Assistants
+## 15. Batasan dan Instruksi untuk Asisten AI Mendatang
 
-### Mandatory Code Rules
+### Aturan Kode Wajib
 
-1. **All UI via `import 'package:ramala/template.dart'`** — never hardcode colors, sizes, or fonts
-2. **Every page wrapped in `AppScaffold`**
-3. **All inputs**: use `Validators.*`, set `maxLength`, use `inputFormatters`, call `Validators.clean()`
-4. **No retry auto**: all `FutureProvider` use `retry: (_, __) => null`
-5. **No client-side balance/role mutations**: all through RPC
-6. **Error display**: always use `AppError.message(e)` — never show raw server messages
-7. **Language**: all UI text in Bahasa Indonesia
-8. **No codegen**: do not add `build_runner`, `freezed`, or `riverpod_generator`
+1. **Semua UI via `import 'package:ramala/template.dart'`** — jangan hardcode warna, ukuran, atau font
+2. **Setiap halaman dibungkus `AppScaffold`**
+3. **Semua input**: gunakan `Validators.*`, atur `maxLength`, gunakan `inputFormatters`, panggil `Validators.clean()`
+4. **Tidak ada retry otomatis**: semua `FutureProvider` menggunakan `retry: (_, __) => null`
+5. **Tidak ada mutasi balance/role sisi client**: semua melalui RPC
+6. **Tampilan error**: selalu gunakan `AppError.message(e)` — jangan tampilkan pesan server mentah
+7. **Bahasa**: semua teks UI dalam Bahasa Indonesia
+8. **Tanpa codegen**: jangan tambahkan `build_runner`, `freezed`, atau `riverpod_generator`
 
-### Widget Signature Traps
+### Jebakan Signature Widget
 
-- `AppNavItem(icon, label, [activeIcon])` — **positional, not named**
-- `AppScaffold` requires either `children` or `body` (assert will throw otherwise)
-- `AppCard(glow: true)` — only one per screen
-- `AppButton(variant: AppButtonVariant.primary)` — only one per screen/panel
-- `MarketCard` — `footer` is **required**
-- `AppBottomSheet.show<T>` returns `Future<T?>` — always handle `null`
-- `TradeSheet` requires `market`, `heldYes`, `heldNo`
+- `AppNavItem(icon, label, [activeIcon])` — **positional, bukan named**
+- `AppScaffold` membutuhkan salah satu dari `children` atau `body` (assert akan throw jika keduanya tidak ada)
+- `AppCard(glow: true)` — hanya satu per layar
+- `AppButton(variant: AppButtonVariant.primary)` — hanya satu per layar/panel
+- `MarketCard` — `footer` adalah **required**
+- `AppBottomSheet.show<T>` mengembalikan `Future<T?>` — selalu tangani `null`
+- `TradeSheet` memerlukan `market`, `heldYes`, `heldNo`
 
-### Provider Patterns
+### Pola Provider
 
-- `FutureProvider.autoDispose` for all data providers
-- Place feature-shared providers in `<feature>/presentation/<feature>_providers.dart`
-- Page-only providers may be defined at file top
-- After mutations: invalidate all affected providers (market + price history + portfolio + balance)
+- `FutureProvider.autoDispose` untuk semua provider data
+- Tempatkan provider yang digunakan bersama dalam `<feature>/presentation/<feature>_providers.dart`
+- Provider hanya untuk halaman tertentu boleh didefinisikan di atas file halaman
+- Setelah mutasi: invalidasi semua provider yang terpengaruh (market + price history + portfolio + balance)
+
+### Aturan Khusus Per Fitur
+
+- **Chatbot**: Selalu gunakan `AiChatService` (bukan `GeminiService` atau `GroqService` langsung); batas input `maxLength: 1000`
+- **Konverter Waktu**: Filter daftar market agar hanya menampilkan market yang `isOpen == true`
+- **Trade sheet**: Input share harus berupa `AppTextField` dengan angka langsung; tetap sertakan chip cepat; validasi ketat wajib
+- **Market list**: Selalu sertakan opsi "Semua" di posisi pertama chip filter kategori; tampilkan `imageUrl` sebagai icon persegi jika ada
+- **Top up**: Validasi angka di client (1–1.000.000); satu pending per user — tangani error `pending_exists`
+- **Admin market**: `p_image_url` harus dikirim ke RPC jika gambar dipilih; koordinat berasal dari `PinPickerPage`
+- **Admin top up**: Setelah approve/reject, request dihapus dari daftar (re-fetch / invalidasi provider)
+- **Feedback admin**: List feedback hanya tampil untuk admin (cek `is_admin()` atau role di client); panggil `admin_set_feedback_hidden` untuk hide/unhide
 
 ---
 
-## 16. Unresolved Questions and Confidence Limitations
+## 16. Pertanyaan Terbuka dan Keterbatasan Kepercayaan
 
-1. **`gemini-3.8-flash` model name**: Unknown if valid — must verify against Gemini API before using chatbot
-2. **Trailing slash in `SUPABASE_URL`**: `env.json` has `https://...supabase.co/`; docs say use base URL without trailing path — verify SDK behavior
-3. **`admin_create_market` `p_image_url`**: Whether RPC accepts null for this required/optional parameter
-4. **`search_history` table**: Intended use for autocomplete is unimplemented
-5. **Workmanager on OEM phones**: Background task may be delayed well beyond 15 min on battery-saving modes
-6. **`minSdk` effective value**: `flutter.minSdkVersion` default; some packages (`local_auth`, `workmanager`) may require higher
-7. **`supabase/` directory**: Could not inspect (binary/directory); likely contains Supabase CLI migration files
+1. **Nama model Gemini**: Belum diketahui apakah `gemini-2.0-flash` valid — harus diverifikasi terhadap API Gemini sebelum mengandalkan chatbot
+2. **Trailing slash di `SUPABASE_URL`**: `env.json` lama memiliki `https://...supabase.co/`; URL tanpa trailing slash direkomendasikan
+3. **`minSdk` efektif**: nilai default `flutter.minSdkVersion`; beberapa paket (`local_auth`, `workmanager`) mungkin memerlukan minSdk lebih tinggi
+4. **Workmanager di HP OEM**: Task background bisa tertunda jauh melampaui 15 menit
+5. **`search_history` table**: Penggunaan yang dimaksudkan untuk autocomplete belum diimplementasikan
 
 ---
 
-## 17. Source Coverage and Files Inspected
+## 17. Cakupan Sumber dan File yang Diinspeksi
 
-### Fully Inspected
+### Diinspeksi Penuh
 
-All Dart source files under `lib/` (49 files, including `template.dart` at 1131 lines), `pubspec.yaml`, all 6 docs files, `AndroidManifest.xml`, `build.gradle.kts`, and `env.json`. `MainActivity.kt` inspected via grep (confirms `FlutterFragmentActivity`).
+Semua file Dart di bawah `lib/` (termasuk `template.dart`), `pubspec.yaml`, semua 6 file docs, `AndroidManifest.xml`, `build.gradle.kts`, `env.json`, dan semua 4 file migrasi di `supabase/migrations/`. `MainActivity.kt` diinspeksi via grep (mengkonfirmasi `FlutterFragmentActivity`).
 
-### Not Inspected
+### Tidak Diinspeksi
 
-- `lib/features/contoh_struktur/`, `lib/features/trading/`, `lib/features/wallet/` — gitkeep only
-- `lib/shell/placeholder_page.dart` — exists, commented out in router
-- `test/` directory — expected empty per docs
-- `supabase/` directory — could not read (OS error)
-- Binary assets (`assets/gambar/`)
+- `lib/features/contoh_struktur/`, `lib/features/trading/`, `lib/features/wallet/` — hanya gitkeep
+- `lib/shell/placeholder_page.dart` — ada, dikomentari di router
+- Direktori `test/` — diharapkan kosong sesuai docs
+- Aset biner (`assets/gambar/`)
 
-### Completeness
+### Kelengkapan
 
-**High confidence**: Architecture, routing, auth, all feature implementations, database schema, LMSR formula, error handling, design system.  
-**Medium confidence**: Supabase RLS rules (server-side), Workmanager behavior per Android version.  
-**Low confidence**: `gemini-3.8-flash` model validity; `supabase/` directory contents.
+**Kepercayaan Tinggi**: Arsitektur, routing, auth, implementasi semua fitur, skema database, formula LMSR, penanganan error, design system.  
+**Kepercayaan Menengah**: Aturan RLS Supabase (sisi server), perilaku Workmanager per versi Android.  
+**Kepercayaan Rendah**: Validitas nama model Gemini saat ini; perilaku task background di perangkat OEM.

@@ -81,11 +81,6 @@ class _State extends ConsumerState<AdminCreateMarketPage> {
     );
     if (x == null) return;
     final bytes = await x.readAsBytes();
-    final im = await decodeImageFromList(bytes);
-    final ratio = im.width / im.height;
-    if (ratio < 0.98 || ratio > 1.02 || im.width < 200) {
-      return _toast('Gambar harus persegi (1:1), minimal 200 px.');
-    }
     setState(() {
       _img = x;
       _imgBytes = bytes;
@@ -194,9 +189,7 @@ class _State extends ConsumerState<AdminCreateMarketPage> {
             ),
           ),
         AppButton(
-          label: _img == null
-              ? 'Pilih gambar persegi (opsional)'
-              : 'Ganti gambar',
+          label: _img == null ? 'Pilih gambar icon (opsional)' : 'Ganti gambar',
           icon: Icons.image_outlined,
           variant: AppButtonVariant.secondary,
           expanded: true,

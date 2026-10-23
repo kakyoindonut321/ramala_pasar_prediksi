@@ -57,19 +57,7 @@ class _Body extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (m.imageUrl != null) ...[
-          ClipRRect(
-            borderRadius: BorderRadius.circular(AppRadius.md),
-            child: CachedNetworkImage(
-              imageUrl: m.imageUrl!,
-              height: 180,
-              width: double.infinity,
-              fit: BoxFit.cover,
-              errorWidget: (_, __, ___) => const SizedBox.shrink(),
-            ),
-          ),
-          const Gap(AppSpace.md),
-        ],
+        if (m.imageUrl != null) ...[_Cover(m.imageUrl), const Gap(AppSpace.md)],
         Wrap(
           spacing: AppSpace.sm,
           children: [
@@ -181,6 +169,39 @@ class _Body extends ConsumerWidget {
               : null,
         ),
       ],
+    );
+  }
+}
+
+class _Cover extends StatelessWidget {
+  const _Cover(this.url);
+  final String? url;
+
+  @override
+  Widget build(BuildContext context) {
+    final placeholder = Container(
+      height: 180,
+      width: double.infinity,
+      color: AppColors.card,
+      child: const Icon(
+        Icons.image_outlined,
+        color: AppColors.textMuted,
+        size: 40,
+      ),
+    );
+    final u = url?.trim() ?? '';
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(AppRadius.md),
+      child: u.isEmpty
+          ? placeholder
+          : CachedNetworkImage(
+              imageUrl: u,
+              height: 180,
+              width: double.infinity,
+              fit: BoxFit.cover,
+              placeholder: (_, __) => placeholder,
+              errorWidget: (_, __, ___) => placeholder,
+            ),
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ramala/core/error/app_error.dart';
 import 'package:ramala/features/market/data/market_repository.dart';
@@ -23,20 +24,46 @@ class TradeSheet extends ConsumerStatefulWidget {
 }
 
 class _TradeSheetState extends ConsumerState<TradeSheet> {
+  static const _min = 0.01, _max = 1000.0;
+  // Maksimal 4 digit bulat + 2 desimal; input lain ditolak
+  static final _fmt = TextInputFormatter.withFunction(
+    (o, n) => RegExp(r'^\d{0,4}([.,]\d{0,2})?$').hasMatch(n.text) ? n : o,
+  );
+
   String _side = 'yes', _action = 'buy';
-  double _shares = 10;
+  final _ctrl = TextEditingController(text: '10');
   bool _busy = false;
 
-  Future<void> _submit() async {
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  /// null jika kosong / bukan angka
+  double? get _parsed {
+    final v = double.tryParse(_ctrl.text.trim().replaceAll(',', '.'));
+    return v == null ? null : (v * 100).round() / 100;
+  }
+
+  String? _validate(double? v) {
+    if (_ctrl.text.trim().isEmpty) return 'Masukkan jumlah share';
+    if (v == null) return 'Angka tidak valid';
+    if (v < _min) return 'Minimal 0,01 share';
+    if (v > _max) return 'Maksimal 1000 share';
+    return null;
+  }
+
+  void _set(double v) {
+    final s = v == v.roundToDouble() ? v.toInt().toString() : v.toString();
+    setState(() => _ctrl.text = s);
+  }
+
+  Future<void> _submit(double shares) async {
     setState(() => _busy = true);
     try {
       final id = widget.market.id;
-      final amount = await MarketRepository().trade(
-        id,
-        _side,
-        _action,
-        _shares,
-      );
+      final amount = await MarketRepository().trade(id, _side, _action, shares);
       ref.invalidate(marketProvider(id));
       ref.invalidate(priceHistoryProvider(id));
       ref.invalidate(marketListProvider);
@@ -51,8 +78,9 @@ class _TradeSheetState extends ConsumerState<TradeSheet> {
       );
       Navigator.pop(context);
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         AppToast.show(context, AppError.message(e), type: ToastType.error);
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -62,21 +90,33 @@ class _TradeSheetState extends ConsumerState<TradeSheet> {
   Widget build(BuildContext context) {
     final m = widget.market;
     final buy = _action == 'buy';
-    final q = Lmsr.quote(
-      qYes: m.qYes,
-      qNo: m.qNo,
-      b: m.b,
-      side: _side,
-      action: _action,
-      shares: _shares,
-    );
     final held = _side == 'yes' ? widget.heldYes : widget.heldNo;
     final bal = ref.watch(balanceProvider).value;
 
-    String? err;
-    if (buy && bal != null && q.amount > bal) err = 'Saldo tidak cukup';
-    if (!buy && _shares > held)
-      err = 'Share ${_side.toUpperCase()} Anda hanya $held';
+    final shares = _parsed;
+    String? err = _validate(shares);
+    final valid = err == null;
+
+    // Kuotasi hanya dihitung jika input valid
+    final q = valid
+        ? Lmsr.quote(
+            qYes: m.qYes,
+            qNo: m.qNo,
+            b: m.b,
+            side: _side,
+            action: _action,
+            shares: shares!,
+          )
+        : null;
+
+    if (valid) {
+      if (buy && bal != null && q!.amount > bal) err = 'Saldo tidak cukup';
+      if (!buy && shares! > held) {
+        err = 'Share ${_side.toUpperCase()} Anda hanya $held';
+      }
+    }
+    // Maks jual: dibulatkan ke bawah 2 desimal, batas 1000
+    final sellMax = ((held.clamp(0, _max)) * 100).floor() / 100;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -99,19 +139,41 @@ class _TradeSheetState extends ConsumerState<TradeSheet> {
           onChanged: (v) => setState(() => _side = v),
         ),
         const Gap(AppSpace.lg),
-        AppAmountStepper(
-          value: _shares,
-          onChanged: (v) => setState(() => _shares = (v * 100).round() / 100),
-          min: 1,
-          max: 1000,
-          step: 1,
+        AppTextField(
           label: 'Jumlah share',
+          hint: '0,01 - 1000',
+          controller: _ctrl,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          maxLength: 7,
+          formatters: [_fmt],
+          onChanged: (_) => setState(() {}),
+        ),
+        const Gap(AppSpace.sm),
+        Wrap(
+          spacing: AppSpace.sm,
+          children: [
+            for (final v in const [10, 50, 100, 500])
+              AppFilterChip(
+                label: '$v',
+                selected: shares == v.toDouble(),
+                onTap: () => _set(v.toDouble()),
+              ),
+            if (!buy && sellMax >= _min)
+              AppFilterChip(
+                label: 'Maks',
+                selected: shares == sellMax,
+                onTap: () => _set(sellMax),
+              ),
+          ],
         ),
         const Gap(AppSpace.lg),
-        _Line(buy ? 'Perkiraan biaya' : 'Perkiraan hasil', CoinText(q.amount)),
+        _Line(
+          buy ? 'Perkiraan biaya' : 'Perkiraan hasil',
+          q == null ? const Text('-') : CoinText(q.amount),
+        ),
         _Line(
           'Harga YES setelah',
-          Text(Fmt.pct(q.priceYes), style: AppText.body),
+          Text(q == null ? '-' : Fmt.pct(q.priceYes), style: AppText.body),
         ),
         _Line('Saldo', bal == null ? const Text('-') : CoinText(bal)),
         if (!buy) _Line('Share dimiliki', Text('$held', style: AppText.body)),
@@ -130,7 +192,7 @@ class _TradeSheetState extends ConsumerState<TradeSheet> {
               ? 'Beli ${_side.toUpperCase()}'
               : 'Jual ${_side.toUpperCase()}',
           loading: _busy,
-          onPressed: err == null && !_busy ? _submit : null,
+          onPressed: err == null && !_busy ? () => _submit(shares!) : null,
         ),
       ],
     );
