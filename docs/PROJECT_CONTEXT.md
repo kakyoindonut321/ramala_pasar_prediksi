@@ -1,7 +1,7 @@
 # PROJECT_CONTEXT.md — Ramala
 
 > **Purpose**: Provides a complete, verified reference for AI coding assistants working on this codebase. Read this before making any changes to the project.
-> **Last updated**: 2026-10-22
+> **Last updated**: 2026-10-23
 > **Coverage**: All files under `lib/`, `pubspec.yaml`, and all six `docs/` files inspected.
 
 ---
@@ -32,7 +32,7 @@ Source: `docs/ketentuan_tugas_akhir.txt`
 | Currency converter (min. 3) + time zone converter (WIB, WIT, WITA, London) | ✅ 5 fiat currencies + 3 crypto; 4 time zones |
 | Min. 2 sensors (Accelerometer, Gyroscope, etc.) | ✅ Both used in game feature |
 | AI/LLM feature | ✅ Gemini chatbot |
-| Mini game | ✅ "Tebak Arah" sensor game |
+| Mini game | ✅ "Tangkap Uang" game with tilt controls |
 | Search and selection facility | ✅ Market list search + category filter |
 | Mobile notification feature | ✅ local notifications + Supabase Realtime + Workmanager |
 | Simple blockchain feature | ✅ `ledger` table with SHA-256 chain, `verify_ledger()` RPC |
