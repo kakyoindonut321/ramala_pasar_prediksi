@@ -8,6 +8,8 @@ import 'package:ramala/core/error/app_error.dart';
 import 'package:ramala/core/validators/validators.dart';
 import 'package:ramala/features/admin/presentation/pin_picker_page.dart';
 import 'package:ramala/features/market/presentation/market_providers.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:ramala/features/market/data/market_image_service.dart';
 import 'package:ramala/template.dart';
 
 class AdminCreateMarketPage extends ConsumerStatefulWidget {
@@ -25,6 +27,8 @@ class _State extends ConsumerState<AdminCreateMarketPage> {
   DateTime? _close;
   LatLng? _pin;
   bool _busy = false;
+  XFile? _img;
+  Uint8List? _imgBytes; // untuk preview
 
   @override
   void dispose() {
@@ -68,6 +72,26 @@ class _State extends ConsumerState<AdminCreateMarketPage> {
     if (p != null) setState(() => _pin = p);
   }
 
+  /// Hanya menerima gambar persegi (rasio 1:1, toleransi 2%), min. 200 px
+  Future<void> _pickImage() async {
+    final x = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1024,
+      maxHeight: 1024,
+    );
+    if (x == null) return;
+    final bytes = await x.readAsBytes();
+    final im = await decodeImageFromList(bytes);
+    final ratio = im.width / im.height;
+    if (ratio < 0.98 || ratio > 1.02 || im.width < 200) {
+      return _toast('Gambar harus persegi (1:1), minimal 200 px.');
+    }
+    setState(() {
+      _img = x;
+      _imgBytes = bytes;
+    });
+  }
+
   Future<void> _create() async {
     if (_busy || !_form.currentState!.validate()) return;
     if (_close == null || !_close!.isAfter(DateTime.now())) {
@@ -75,6 +99,9 @@ class _State extends ConsumerState<AdminCreateMarketPage> {
     }
     setState(() => _busy = true);
     try {
+      final imageUrl = _img == null
+          ? null
+          : await MarketImageService().upload(_img!.path);
       await Supabase.instance.client.rpc(
         'admin_create_market',
         params: {
@@ -83,15 +110,21 @@ class _State extends ConsumerState<AdminCreateMarketPage> {
           'p_description': Validators.clean(_desc.text),
           'p_category': Validators.clean(_cat.text),
           'p_b': double.parse(_b.text),
+          if (imageUrl != null) 'p_image_url': imageUrl,
           if (_pin != null) 'p_lat': _pin!.latitude,
           if (_pin != null) 'p_lng': _pin!.longitude,
         },
       );
       ref.invalidate(marketListProvider);
+      ref.invalidate(categoriesProvider);
       _toast('Market dibuat', ToastType.success);
-      if (mounted) Navigator.pop(context); // kembali ke dashboard
+      if (mounted) Navigator.pop(context);
     } catch (e) {
-      _toast(AppError.message(e));
+      _toast(
+        e is FormatException
+            ? 'Gambar tidak valid atau terlalu besar.'
+            : AppError.message(e),
+      );
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -147,6 +180,40 @@ class _State extends ConsumerState<AdminCreateMarketPage> {
             ],
           ),
         ),
+        const Gap(AppSpace.md),
+        if (_imgBytes != null)
+          Center(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              child: Image.memory(
+                _imgBytes!,
+                width: 96,
+                height: 96,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+        AppButton(
+          label: _img == null
+              ? 'Pilih gambar persegi (opsional)'
+              : 'Ganti gambar',
+          icon: Icons.image_outlined,
+          variant: AppButtonVariant.secondary,
+          expanded: true,
+          onPressed: _busy ? null : _pickImage,
+        ),
+        if (_img != null)
+          Align(
+            alignment: Alignment.centerRight,
+            child: AppButton(
+              label: 'Hapus gambar',
+              variant: AppButtonVariant.ghost,
+              onPressed: () => setState(() {
+                _img = null;
+                _imgBytes = null;
+              }),
+            ),
+          ),
         const Gap(AppSpace.md),
         AppButton(
           label: _close == null

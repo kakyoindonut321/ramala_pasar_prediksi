@@ -9,6 +9,8 @@ import 'package:ramala/features/notification/data/background_worker.dart';
 import 'package:ramala/features/notification/data/notification_service.dart';
 import 'package:timezone/data/latest.dart' as tz;
 
+import 'package:intl/date_symbol_data_local.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Supabase.initialize(
@@ -20,6 +22,7 @@ Future<void> main() async {
   );
   await NotificationService.init();
   await Workmanager().initialize(callbackDispatcher);
+  await initializeDateFormatting('id_ID', null);
   tz.initializeTimeZones();
   runApp(const ProviderScope(child: RamalaApp()));
 }
