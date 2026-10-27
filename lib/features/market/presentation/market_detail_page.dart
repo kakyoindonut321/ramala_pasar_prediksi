@@ -13,6 +13,8 @@ import 'package:ramala/features/market/presentation/onchain_status.dart';
 import 'package:ramala/template.dart';
 import 'package:ramala/features/market/presentation/onchain_check_button.dart';
 import 'package:ramala/features/market/data/market_repository.dart';
+import 'package:ramala/features/market/presentation/close_times.dart';
+import 'package:ramala/features/market/presentation/market_location_page.dart';
 
 final _isAdminProvider = FutureProvider.autoDispose<bool>((ref) async {
   final r = await Supabase.instance.client.rpc('is_admin');
@@ -75,6 +77,7 @@ class _Body extends ConsumerWidget {
         mine.where((p) => p.side == side).fold(0.0, (a, p) => a + p.shares);
     final status = MarketStatus.from(m.status, m.closeAt);
     final isAdmin = ref.watch(_isAdminProvider).value ?? false;
+    final loc = ref.watch(marketLocationProvider(m.id)).value;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -146,6 +149,22 @@ class _Body extends ConsumerWidget {
             ),
           ],
         ),
+        const Gap(AppSpace.lg),
+        CloseTimes(m.closeAt),
+        if (loc != null) ...[
+          const Gap(AppSpace.md),
+          AppButton(
+            label: 'Lihat lokasi market',
+            icon: Icons.place_outlined,
+            variant: AppButtonVariant.secondary,
+            expanded: true,
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => MarketLocationPage(title: m.title, point: loc),
+              ),
+            ),
+          ),
+        ],
         if (m.status == 'resolved' && m.chainStatus != null) ...[
           const Gap(AppSpace.md),
           OnchainStatus(
