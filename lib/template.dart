@@ -644,6 +644,90 @@ class AppFilterChip extends StatelessWidget {
   );
 }
 
+/// Tombol ikon persegi seukuran field input; `badge` = titik penanda pengaturan aktif.
+class AppIconButton extends StatelessWidget {
+  const AppIconButton({
+    super.key,
+    required this.icon,
+    required this.onTap,
+    this.badge = false,
+  });
+  final IconData icon;
+  final VoidCallback onTap;
+  final bool badge;
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: onTap,
+    child: Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Container(
+          width: 52,
+          height: 52,
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(AppRadius.md),
+            border: Border.all(
+              color: badge ? AppColors.primary : AppColors.border,
+            ),
+          ),
+          child: Icon(
+            icon,
+            color: badge ? AppColors.primary : AppColors.textDim,
+          ),
+        ),
+        if (badge)
+          Positioned(
+            top: 8,
+            right: 8,
+            child: Container(
+              width: 8,
+              height: 8,
+              decoration: const BoxDecoration(
+                color: AppColors.primary,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+      ],
+    ),
+  );
+}
+
+/// Chip dua baris, scroll horizontal. Urutan: kiri-atas, kiri-bawah, kanan-atas, ...
+/// (genap di baris atas, ganjil di baris bawah, tiap baris selebar isinya).
+class AppChipRows extends StatelessWidget {
+  const AppChipRows({super.key, required this.children});
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final top = <Widget>[], bottom = <Widget>[];
+    for (var i = 0; i < children.length; i++) {
+      (i.isEven ? top : bottom).add(children[i]);
+    }
+    Widget row(List<Widget> r) => Row(
+      children: [
+        for (var i = 0; i < r.length; i++) ...[
+          if (i > 0) const SizedBox(width: AppSpace.sm),
+          r[i],
+        ],
+      ],
+    );
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          row(top),
+          if (bottom.isNotEmpty) ...[const Gap(AppSpace.sm), row(bottom)],
+        ],
+      ),
+    );
+  }
+}
+
 class AppSegmentOption<T> {
   const AppSegmentOption(
     this.value,

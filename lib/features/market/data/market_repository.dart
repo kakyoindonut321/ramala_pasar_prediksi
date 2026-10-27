@@ -11,7 +11,7 @@ typedef MarketQuery = ({
   String text,
   String? category,
   bool done,
-  String sort, // 'trending' | 'newest'
+  String sort, // 'foryou' | 'trending' | 'newest'
   int limit,
 });
 
@@ -71,6 +71,14 @@ class MarketRepository {
   /// Halaman pasar: filter aktif/selesai, kategori, pencarian, dan urutan di server
   Future<List<Market>> page(MarketQuery q) async {
     Future<List<Map<String, dynamic>>> fetch() {
+      if (q.sort == 'foryou') {
+        return _db
+            .rpc(
+              'markets_for_you',
+              params: {'p_done': q.done, 'p_text': q.text, 'p_limit': q.limit},
+            )
+            .select(marketCols);
+      }
       final now = DateTime.now().toUtc().toIso8601String();
       var req = _db.from('markets').select(marketCols);
       req = q.done
@@ -101,5 +109,27 @@ class MarketRepository {
   Future<List<String>> categories() async {
     final rows = await _db.from('markets').select('category').limit(1000);
     return ({...rows.map((r) => r['category'] as String)}.toList()..sort());
+  }
+
+  /// Apakah user pernah trade (dicache; sekali true tetap true)
+  Future<bool> hasHistory() async {
+    final uid = _db.auth.currentUser?.id;
+    if (uid == null) return false;
+    final key = 'hist:$uid';
+    if (await LocalDb.getCache(key) == true) return true;
+    final r = await _db
+        .from('trades')
+        .select('id')
+        .neq('action', 'payout')
+        .limit(1);
+    if (r.isNotEmpty) await LocalDb.putCache(key, true);
+    return r.isNotEmpty;
+  }
+
+  /// Catat view (best-effort, kegagalan diabaikan)
+  Future<void> logView(String id) async {
+    try {
+      await _db.rpc('log_market_view', params: {'p_market': id});
+    } catch (_) {}
   }
 }

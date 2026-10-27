@@ -12,18 +12,30 @@ import 'package:ramala/features/market/data/onchain_service.dart';
 import 'package:ramala/features/market/presentation/onchain_status.dart';
 import 'package:ramala/template.dart';
 import 'package:ramala/features/market/presentation/onchain_check_button.dart';
+import 'package:ramala/features/market/data/market_repository.dart';
 
 final _isAdminProvider = FutureProvider.autoDispose<bool>((ref) async {
   final r = await Supabase.instance.client.rpc('is_admin');
   return r == true;
 }, retry: (_, __) => null);
 
-class MarketDetailPage extends ConsumerWidget {
+class MarketDetailPage extends ConsumerStatefulWidget {
   const MarketDetailPage(this.id, {super.key});
   final String id;
+  @override
+  ConsumerState<MarketDetailPage> createState() => _MarketDetailPageState();
+}
+
+class _MarketDetailPageState extends ConsumerState<MarketDetailPage> {
+  @override
+  void initState() {
+    super.initState();
+    MarketRepository().logView(widget.id); // best-effort, tidak ditunggu
+  }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
+    final id = widget.id;
     final market = ref.watch(marketProvider(id));
     return AppScaffold(
       title: 'Detail Market',

@@ -29,3 +29,8 @@ final categoriesProvider = FutureProvider.autoDispose<List<String>>(
   (ref) => MarketRepository().categories(),
   retry: (_, __) => null,
 );
+
+final hasHistoryProvider = FutureProvider.autoDispose<bool>(
+  (ref) => MarketRepository().hasHistory(),
+  retry: (_, __) => null,
+);
