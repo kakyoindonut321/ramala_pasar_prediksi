@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:ramala/core/error/app_error.dart';
 import 'package:ramala/template.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:ramala/features/market/data/onchain_service.dart';
 
 final ledgerProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>(
   (ref) async => List<Map<String, dynamic>>.from(
@@ -51,6 +53,12 @@ class _LedgerPageState extends ConsumerState<LedgerPage> {
 
   String _short(String h) => '${h.substring(0, 12)}…';
 
+  /// Mengambil tx_hash dari blok 'onchain|<market>|<tx>', atau null jika bukan blok itu
+  String? _tx(String data) {
+    final p = data.split('|');
+    return p.length == 3 && p[0] == 'onchain' ? p[2] : null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final async = ref.watch(ledgerProvider);
@@ -64,7 +72,7 @@ class _LedgerPageState extends ConsumerState<LedgerPage> {
       },
       children: [
         Text(
-          'Setiap transaksi dicatat dalam rantai blok. Hash tiap blok = SHA-256(idx|prev_hash|data).',
+          'Setiap transaksi dicatat dalam rantai blok. Hash tiap blok = SHA-256(idx|prev_hash|data). Blok bertanda on-chain mengacu ke transaksi di Sepolia; ketuk untuk membukanya di explorer.',
           style: AppText.bodyDim,
         ),
         const Gap(AppSpace.lg),
@@ -96,6 +104,14 @@ class _LedgerPageState extends ConsumerState<LedgerPage> {
                           borderColor: (b['idx'] as num).toInt() == _bad
                               ? AppColors.no
                               : null,
+                          onTap: _tx(b['data'] as String) == null
+                              ? null
+                              : () => launchUrl(
+                                  Uri.parse(
+                                    '${OnchainService.explorerTx}${_tx(b['data'] as String)}',
+                                  ),
+                                  mode: LaunchMode.externalApplication,
+                                ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -110,6 +126,13 @@ class _LedgerPageState extends ConsumerState<LedgerPage> {
                                     'hash ${_short(b['hash'] as String)}',
                                     style: AppText.caption,
                                   ),
+                                  if (_tx(b['data'] as String) != null) ...[
+                                    const Spacer(),
+                                    const AppBadge(
+                                      'on-chain',
+                                      color: AppColors.accent,
+                                    ),
+                                  ],
                                 ],
                               ),
                               const Gap(AppSpace.xs),

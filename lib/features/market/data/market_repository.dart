@@ -4,7 +4,7 @@ import 'package:ramala/core/validators/validators.dart';
 import 'package:ramala/features/market/domain/market.dart';
 
 const marketCols =
-    'id,title,description,category,image_url,close_at,status,outcome,b,q_yes,q_no,price_yes,volume';
+    'id,title,description,category,image_url,close_at,status,outcome,b,q_yes,q_no,price_yes,volume,chain_status,chain_tx';
 
 /// Kunci query halaman pasar (record, equality otomatis untuk family provider)
 typedef MarketQuery = ({

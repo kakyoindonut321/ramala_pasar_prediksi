@@ -6,6 +6,7 @@ import 'package:ramala/core/error/app_error.dart';
 import 'package:ramala/features/market/domain/market.dart';
 import 'package:ramala/features/market/presentation/market_providers.dart';
 import 'package:ramala/template.dart';
+import 'package:ramala/features/market/data/onchain_service.dart';
 
 class AdminResolvePage extends ConsumerStatefulWidget {
   const AdminResolvePage({super.key});
@@ -53,6 +54,7 @@ class _State extends ConsumerState<AdminResolvePage> {
     );
     if (!ok) return;
     setState(() => _busy = true);
+    final container = ProviderScope.containerOf(context);
     try {
       await Supabase.instance.client.rpc(
         'admin_resolve_market',
@@ -61,6 +63,15 @@ class _State extends ConsumerState<AdminResolvePage> {
       ref.invalidate(marketListProvider);
       ref.invalidate(marketProvider(m.id));
       _toast('Market diselesaikan', ToastType.success);
+
+      // Catat on-chain di latar belakang (bisa sampai 90 detik).
+      // Kegagalan tidak membatalkan resolusi; statusnya sudah dicatat server.
+      OnchainService().record(m.id).catchError((_) => 'failed').whenComplete(
+        () {
+          container.invalidate(marketProvider(m.id));
+          container.invalidate(marketListProvider);
+        },
+      );
     } catch (e) {
       _toast(AppError.message(e));
     } finally {

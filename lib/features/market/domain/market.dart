@@ -13,12 +13,16 @@ class Market {
     this.description,
     this.imageUrl,
     this.outcome,
+    this.chainStatus,
+    this.chainTx,
   });
 
   final String id, title, category, status;
   final String? description, imageUrl, outcome;
   final DateTime closeAt;
   final double b, qYes, qNo, priceYes, volume;
+  final String? chainStatus, chainTx;
+  // di fromMap: chainStatus: m['chain_status'] as String?, chainTx: m['chain_tx'] as String?,
 
   bool get isOpen => status == 'open' && closeAt.isAfter(DateTime.now());
 
@@ -36,5 +40,7 @@ class Market {
     qNo: (m['q_no'] as num).toDouble(),
     priceYes: (m['price_yes'] as num).toDouble(),
     volume: (m['volume'] as num).toDouble(),
+    chainStatus: m['chain_status'] as String?,
+    chainTx: m['chain_tx'] as String?,
   );
 }
