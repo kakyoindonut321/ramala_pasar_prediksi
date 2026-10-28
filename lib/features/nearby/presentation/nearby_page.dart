@@ -54,6 +54,10 @@ final _nearbyProvider =
           .from('markets')
           .select('id,title,category,latitude,longitude,price_yes')
           .eq('status', 'open')
+          .gt(
+            'close_at',
+            DateTime.now().toUtc().toIso8601String(),
+          ) // hanya yang belum tutup
           .not('latitude', 'is', null);
       final items = rows.map((r) {
         final pos = LatLng(

@@ -126,10 +126,10 @@ class _ChatPageState extends ConsumerState<ChatPage> {
         children: [
           Expanded(
             child: list.isEmpty
-                ? const EmptyState(
+                ? const EmptyStateImage(
                     title: 'Tanya Ramala AI',
                     message: 'Contoh: "Jelaskan cara kerja harga LMSR".',
-                    icon: Icons.smart_toy_outlined,
+                    image: 'assets/gambar/logo_chatbot.png',
                   )
                 : ListView.builder(
                     reverse: true,

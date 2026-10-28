@@ -98,13 +98,13 @@ class _FeedbackPageState extends ConsumerState<FeedbackPage> {
     final isAdmin = ref.watch(_isAdminProvider).value ?? false;
 
     return AppScaffold(
-      title: 'Saran & Kesan',
+      title: 'Rate Us',
       onRefresh: isAdmin
           ? () async => ref.invalidate(_feedbackListProvider)
           : null,
       children: [
         Text(
-          'Gimana Mata kuliah Pemrograman Aplikasi Mobile?',
+          'Bagaimana pengalamanmu memakai Ramala?',
           style: AppText.bodyDim,
           textAlign: TextAlign.center,
         ),
@@ -131,7 +131,7 @@ class _FeedbackPageState extends ConsumerState<FeedbackPage> {
           child: Column(
             children: [
               AppTextField(
-                label: 'Kesan',
+                label: 'Kesan tentang Ramala',
                 controller: _impression,
                 maxLength: 500,
                 maxLines: 4,
@@ -139,7 +139,7 @@ class _FeedbackPageState extends ConsumerState<FeedbackPage> {
               ),
               const Gap(AppSpace.md),
               AppTextField(
-                label: 'Saran',
+                label: 'Saran untuk Ramala',
                 controller: _suggestion,
                 maxLength: 500,
                 maxLines: 4,

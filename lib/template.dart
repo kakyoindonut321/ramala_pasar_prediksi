@@ -249,6 +249,7 @@ class AppScaffold extends StatelessWidget {
     this.onRefresh,
     this.bottomNav,
     this.fab,
+    this.fabLocation,
   }) : assert(children != null || body != null);
 
   final String? title;
@@ -258,6 +259,8 @@ class AppScaffold extends StatelessWidget {
   final Future<void> Function()? onRefresh;
   final Widget? bottomNav;
   final Widget? fab;
+  final FloatingActionButtonLocation?
+  fabLocation; // null = default (kanan bawah)
 
   @override
   Widget build(BuildContext context) {
@@ -298,6 +301,7 @@ class AppScaffold extends StatelessWidget {
                 actions: actions,
               ),
         floatingActionButton: fab,
+        floatingActionButtonLocation: fabLocation,
         bottomNavigationBar: bottomNav,
         body: SafeArea(
           top: title == null,
@@ -1418,6 +1422,68 @@ class _StateView extends StatelessWidget {
   );
 }
 
+/// Data kosong (daftar belum ada isi) — versi gambar bulat dari asset.
+/// Clone dari [EmptyState]; ukuran, border, dan layout identik,
+/// hanya isi lingkaran diganti Image.asset alih-alih Icon.
+class EmptyStateImage extends StatelessWidget {
+  const EmptyStateImage({
+    super.key,
+    required this.title,
+    required this.message,
+    required this.image,
+    this.actionLabel,
+    this.onAction,
+  });
+  final String title, message, image;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+
+  @override
+  Widget build(BuildContext context) => Center(
+    child: Padding(
+      padding: const EdgeInsets.all(AppSpace.xl),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.arcane.withValues(alpha: .12),
+              border: Border.all(color: AppColors.primary),
+            ),
+            child: ClipOval(
+              child: Image.asset(
+                image,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => const Icon(
+                  Icons.image_not_supported_outlined,
+                  color: AppColors.arcane,
+                  size: 32,
+                ),
+              ),
+            ),
+          ),
+          const Gap(AppSpace.lg),
+          Text(title, style: AppText.heading, textAlign: TextAlign.center),
+          const Gap(AppSpace.xs),
+          Text(message, style: AppText.bodyDim, textAlign: TextAlign.center),
+          if (actionLabel != null) ...[
+            const Gap(AppSpace.lg),
+            AppButton(
+              label: actionLabel!,
+              onPressed: onAction,
+              variant: AppButtonVariant.secondary,
+              expanded: false,
+            ),
+          ],
+        ],
+      ),
+    ),
+  );
+}
+
 /// Data kosong (daftar belum ada isi).
 class EmptyState extends StatelessWidget {
   const EmptyState({
@@ -1563,6 +1629,330 @@ class AppBottomSheet {
             const Gap(AppSpace.lg),
             child,
           ],
+        ),
+      ),
+    ),
+  );
+}
+
+// ============================================================================
+// 11. KOMPONEN HALAMAN FITUR (dropdown, kurs, ticker, hero, FAB asisten)
+// ============================================================================
+
+class AppDropdownOption<T> {
+  const AppDropdownOption(this.value, this.label, {this.hint});
+  final T value;
+  final String label; // tampil di kolom terpilih
+  final String? hint; // keterangan kecil di daftar
+}
+
+/// Dropdown bergaya AppTextField.
+class AppDropdown<T> extends StatelessWidget {
+  const AppDropdown({
+    super.key,
+    required this.options,
+    required this.value,
+    required this.onChanged,
+    this.label,
+  });
+  final List<AppDropdownOption<T>> options;
+  final T value;
+  final ValueChanged<T> onChanged;
+  final String? label;
+
+  @override
+  Widget build(BuildContext context) => InputDecorator(
+    decoration: AppInput.decoration(label: label),
+    child: DropdownButtonHideUnderline(
+      child: DropdownButton<T>(
+        value: value,
+        isExpanded: true,
+        isDense: true,
+        menuMaxHeight: 320,
+        dropdownColor: AppColors.card,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        icon: const Icon(Icons.expand_more, color: AppColors.textDim),
+        style: AppText.body,
+        selectedItemBuilder: (_) => [
+          for (final o in options)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(o.label, style: AppText.body),
+            ),
+        ],
+        items: [
+          for (final o in options)
+            DropdownMenuItem<T>(
+              value: o.value,
+              child: Row(
+                children: [
+                  Text(o.label, style: AppText.label),
+                  if (o.hint != null) ...[
+                    const SizedBox(width: AppSpace.sm),
+                    Expanded(
+                      child: Text(
+                        o.hint!,
+                        style: AppText.caption,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+        ],
+        onChanged: (v) {
+          if (v != null) onChanged(v);
+        },
+      ),
+    ),
+  );
+}
+
+/// Hanya angka dan satu titik desimal (koma diubah jadi titik); panjang dibatasi.
+final _amountFormatter = TextInputFormatter.withFunction((old, v) {
+  final t = v.text.replaceAll(',', '.');
+  return RegExp(r'^\d{0,12}(\.\d{0,8})?$').hasMatch(t)
+      ? v.copyWith(text: t)
+      : old;
+});
+
+/// Kolom angka + dropdown mata uang. Dipakai berpasangan (A dan B).
+class CurrencyPairField extends StatelessWidget {
+  const CurrencyPairField({
+    super.key,
+    required this.label,
+    required this.controller,
+    required this.code,
+    required this.options,
+    required this.onAmount,
+    required this.onCode,
+  });
+  final String label, code;
+  final TextEditingController controller;
+  final List<AppDropdownOption<String>> options;
+  final ValueChanged<String> onAmount, onCode;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: [
+      Expanded(
+        child: AppTextField(
+          label: label,
+          controller: controller,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          formatters: [_amountFormatter],
+          onChanged: onAmount,
+        ),
+      ),
+      const SizedBox(width: AppSpace.sm),
+      SizedBox(
+        width: 116,
+        child: AppDropdown<String>(
+          options: options,
+          value: code,
+          onChanged: onCode,
+        ),
+      ),
+    ],
+  );
+}
+
+/// Satu baris harga aset kripto. Teks harga sudah diformat pemanggil.
+class CryptoTicker extends StatelessWidget {
+  const CryptoTicker({
+    super.key,
+    required this.symbol,
+    required this.name,
+    required this.usd,
+    this.idr,
+  });
+  final String symbol, name, usd;
+  final String? idr;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(
+      horizontal: AppSpace.lg,
+      vertical: AppSpace.md,
+    ),
+    child: Row(
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          padding: const EdgeInsets.all(AppSpace.xs),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: AppColors.accent.withValues(alpha: .15),
+          ),
+          child: FittedBox(
+            child: Text(
+              symbol,
+              style: AppText.label.copyWith(color: AppColors.accent),
+            ),
+          ),
+        ),
+        const SizedBox(width: AppSpace.md),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(symbol, style: AppText.body),
+              Text(name, style: AppText.caption),
+            ],
+          ),
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(usd, style: AppText.numberSm),
+            if (idr != null) Text(idr!, style: AppText.caption),
+          ],
+        ),
+      ],
+    ),
+  );
+}
+
+/// Kartu besar untuk satu fitur unggulan (game). Memakai glow: satu per layar.
+class FeatureHeroCard extends StatelessWidget {
+  const FeatureHeroCard({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.description,
+    required this.actionLabel,
+    required this.onAction,
+    this.tags = const [],
+    this.stats = const [],
+  });
+  final IconData icon;
+  final String title, description, actionLabel;
+  final VoidCallback onAction;
+  final List<String> tags;
+  final List<(String, String)> stats; // (label, nilai)
+
+  @override
+  Widget build(BuildContext context) => AppCard(
+    glow: true,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: .15),
+                borderRadius: BorderRadius.circular(AppRadius.md),
+              ),
+              child: Icon(icon, color: AppColors.primary, size: 28),
+            ),
+            const SizedBox(width: AppSpace.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: AppText.heading),
+                  if (tags.isNotEmpty) ...[
+                    const Gap(AppSpace.xs),
+                    Wrap(
+                      spacing: AppSpace.xs,
+                      runSpacing: AppSpace.xs,
+                      children: [for (final t in tags) AppBadge(t)],
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+        const Gap(AppSpace.md),
+        Text(description, style: AppText.bodyDim),
+        if (stats.isNotEmpty) ...[
+          const Gap(AppSpace.md),
+          Row(
+            children: [
+              for (var i = 0; i < stats.length; i++) ...[
+                if (i > 0) const SizedBox(width: AppSpace.sm),
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.all(AppSpace.md),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          stats[i].$1,
+                          style: AppText.caption,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(stats[i].$2, style: AppText.number),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
+        const Gap(AppSpace.lg),
+        AppButton(
+          label: actionLabel,
+          icon: Icons.play_arrow_rounded,
+          onPressed: onAction,
+        ),
+      ],
+    ),
+  );
+}
+
+/// Tombol melayang asisten AI: gambar bulat dengan glow tipis.
+class AssistantFab extends StatelessWidget {
+  const AssistantFab({
+    super.key,
+    required this.onTap,
+    this.image = 'assets/gambar/logo_chatbot.png',
+    this.label = 'Ramala AI',
+  });
+  final VoidCallback onTap;
+  final String image, label;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    button: true,
+    label: label,
+    child: Tooltip(
+      message: label,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 60,
+          height: 60,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: AppColors.card,
+            border: Border.all(color: AppColors.primary, width: 1.5),
+            boxShadow: AppColors.glow(),
+          ),
+          child: ClipOval(
+            child: Image.asset(
+              image,
+              fit: BoxFit.cover,
+              errorBuilder: (_, _, _) => const Icon(
+                Icons.smart_toy_outlined,
+                color: AppColors.primary,
+              ),
+            ),
+          ),
         ),
       ),
     ),

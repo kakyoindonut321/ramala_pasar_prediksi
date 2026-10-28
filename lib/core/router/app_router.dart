@@ -25,6 +25,7 @@ import 'package:ramala/features/profile/presentation/profile_page.dart';
 import 'package:ramala/features/market/presentation/market_detail_page.dart';
 import 'package:ramala/features/market/presentation/market_list_page.dart';
 import 'package:ramala/features/portfolio/presentation/portfolio_page.dart';
+import 'package:ramala/features/about/presentation/about_page.dart';
 
 /// Memicu ulang redirect saat status login berubah
 class _AuthRefresh extends ChangeNotifier {
@@ -89,6 +90,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         ],
       ),
       GoRoute(path: '/topup', builder: (_, __) => const TopupPage()),
+      GoRoute(path: '/about', builder: (_, __) => const AboutPage()),
+      GoRoute(path: '/rate', builder: (_, __) => const FeedbackPage()),
       StatefulShellRoute.indexedStack(
         builder: (_, __, shell) => MainShell(shell),
         branches: [
@@ -111,11 +114,6 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(path: '/fitur', builder: (_, __) => const FeaturesPage()),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(path: '/saran', builder: (_, __) => const FeedbackPage()),
             ],
           ),
           StatefulShellBranch(

@@ -167,6 +167,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           data: (p) => Column(
             children: [
               AppCard(
+                // borderColor: Colors.transparent,
                 glow: true,
                 child: SizedBox(
                   width: double.infinity,
@@ -223,9 +224,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     ),
                     const Divider(),
                     AppListTile(
-                      icon: Icons.link,
-                      title: 'Ledger blockchain',
-                      onTap: () => context.push('/ledger'),
+                      icon: Icons.star_outline_rounded,
+                      title: 'Rate Us',
+                      onTap: () => context.push('/rate'),
+                    ),
+                    const Divider(),
+                    AppListTile(
+                      icon: Icons.info_outline,
+                      title: 'About',
+                      onTap: () => context.push('/about'),
                     ),
                     if (p.role == 'admin') ...[
                       const Divider(),
