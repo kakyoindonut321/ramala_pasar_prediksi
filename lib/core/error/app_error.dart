@@ -63,6 +63,9 @@ class AppError {
       }
       return 'Gagal terhubung ke layanan. Coba lagi.';
     }
-    return 'Terjadi kesalahan. Coba lagi.';
+    // SEMENTARA (hapus sebelum build final)
+    final s = e.toString();
+    return 'Terjadi kesalahan. [${e.runtimeType}] ${s.length > 220 ? s.substring(0, 220) : s}';
+    // return 'Terjadi kesalahan. Coba lagi.';
   }
 }
