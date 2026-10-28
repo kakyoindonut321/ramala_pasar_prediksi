@@ -1,0 +1,185 @@
+/lib
+|   app.dart
+|   main.dart
+|   template.dart
+|
++---core
+|   +---config
+|   |       env.dart
+|   |
+|   +---error
+|   |       app_error.dart
+|   |
+|   +---network
+|   |       .gitkeep
+|   |
+|   +---router
+|   |       app_router.dart
+|   |
+|   +---storage
+|   |       local_db.dart
+|   |       secure_session.dart
+|   |
+|   +---theme
+|   |       .gitkeep
+|   |
+|   +---utils
+|   |       .gitkeep
+|   |
+|   +---validators
+|   |       validators.dart
+|   |
+|   \---widgets
+|       |   input_sheet.dart
+|       |
+|       \---state loading
+|           \---error
+|               \---empty
+|                       .gitkeep
+|
++---features
+|   +---about
+|   |   \---presentation
+|   |           about_page.dart
+|   |
+|   +---admin
+|   |   \---presentation
+|   |           admin_create_market_page.dart
+|   |           admin_page.dart
+|   |           admin_resolve_page.dart
+|   |           admin_topup_page.dart
+|   |           pin_picker_page.dart
+|   |
+|   +---auth
+|   |   +---data
+|   |   |       auth_repository.dart
+|   |   |       biometric_service.dart
+|   |   |
+|   |   \---presentation
+|   |           login_page.dart
+|   |           register_page.dart
+|   |
+|   +---chatbot
+|   |   +---data
+|   |   |       ai_chat_service.dart
+|   |   |       gemini_service.dart
+|   |   |       groq_service.dart
+|   |   |
+|   |   \---presentation
+|   |           chat_page.dart
+|   |
+|   +---contoh_struktur
+|   |   +---data
+|   |   |       .gitkeep
+|   |   |
+|   |   +---domain
+|   |   |       .gitkeep
+|   |   |
+|   |   \---presentation
+|   |           .gitkeep
+|   |
+|   +---converter
+|   |   +---data
+|   |   |       rates_repository.dart
+|   |   |       rates_service.dart
+|   |   |
+|   |   \---presentation
+|   |           converter_page.dart
+|   |           converter_section.dart
+|   |
+|   +---feedback
+|   |   \---presentation
+|   |           feedback_page.dart
+|   |
+|   +---game
+|   |   \---presentation
+|   |           game_page.dart
+|   |
+|   +---ledger
+|   |   \---presentation
+|   |           ledger_page.dart
+|   |           ledger_preview.dart
+|   |
+|   +---market
+|   |   +---data
+|   |   |       market_image_service.dart
+|   |   |       market_repository.dart
+|   |   |       onchain_service.dart
+|   |   |       onchain_verifier.dart
+|   |   |
+|   |   +---domain
+|   |   |       lmsr.dart
+|   |   |       market.dart
+|   |   |
+|   |   \---presentation
+|   |           close_times.dart
+|   |           market_detail_page.dart
+|   |           market_list_page.dart
+|   |           market_location_page.dart
+|   |           market_providers.dart
+|   |           onchain_check_button.dart
+|   |           onchain_status.dart
+|   |           trade_sheet.dart
+|   |
+|   +---nearby
+|   |   \---presentation
+|   |           nearby_page.dart
+|   |
+|   +---notification
+|   |   +---data
+|   |   |       background_worker.dart
+|   |   |       notification_repository.dart
+|   |   |       notification_service.dart
+|   |   |
+|   |   +---domain
+|   |   |       app_notification.dart
+|   |   |
+|   |   \---presentation
+|   |           notification_page.dart
+|   |
+|   +---portfolio
+|   |   +---data
+|   |   |       portfolio_repository.dart
+|   |   |
+|   |   \---presentation
+|   |           portfolio_page.dart
+|   |           portfolio_providers.dart
+|   |
+|   +---profile
+|   |   +---data
+|   |   |       cloudinary_service.dart
+|   |   |       profile_repository.dart
+|   |   |
+|   |   \---presentation
+|   |           profile_page.dart
+|   |           profile_providers.dart
+|   |
+|   +---topup
+|   |   +---data
+|   |   |       topup_repository.dart
+|   |   |
+|   |   \---presentation
+|   |           topup_page.dart
+|   |
+|   +---trading
+|   |       .gitkeep
+|   |
+|   \---wallet
+|           .gitkeep
+|
+\---shell
+        features_page.dart
+        main_shell.dart
+        placeholder_page.dart
+
+supabase
+|
+\---migrations
+        001_functions.sql
+        001_schema.sql
+        003_topup.sql
+        007_feedback_admin.sql
+        008_onchain.sql
+        009_chain_confirm.sql
+        010_foryou.sql
+        011_default_avatar.sql

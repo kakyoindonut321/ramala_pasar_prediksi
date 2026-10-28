@@ -7,14 +7,37 @@ import 'package:ramala/features/market/domain/market.dart';
 import 'package:ramala/features/market/presentation/market_providers.dart';
 import 'package:ramala/features/market/presentation/trade_sheet.dart';
 import 'package:ramala/features/portfolio/presentation/portfolio_providers.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:ramala/features/market/data/onchain_service.dart';
+import 'package:ramala/features/market/presentation/onchain_status.dart';
 import 'package:ramala/template.dart';
+import 'package:ramala/features/market/presentation/onchain_check_button.dart';
+import 'package:ramala/features/market/data/market_repository.dart';
+import 'package:ramala/features/market/presentation/close_times.dart';
+import 'package:ramala/features/market/presentation/market_location_page.dart';
 
-class MarketDetailPage extends ConsumerWidget {
+final _isAdminProvider = FutureProvider.autoDispose<bool>((ref) async {
+  final r = await Supabase.instance.client.rpc('is_admin');
+  return r == true;
+}, retry: (_, __) => null);
+
+class MarketDetailPage extends ConsumerStatefulWidget {
   const MarketDetailPage(this.id, {super.key});
   final String id;
+  @override
+  ConsumerState<MarketDetailPage> createState() => _MarketDetailPageState();
+}
+
+class _MarketDetailPageState extends ConsumerState<MarketDetailPage> {
+  @override
+  void initState() {
+    super.initState();
+    MarketRepository().logView(widget.id); // best-effort, tidak ditunggu
+  }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
+    final id = widget.id;
     final market = ref.watch(marketProvider(id));
     return AppScaffold(
       title: 'Detail Market',
@@ -53,6 +76,8 @@ class _Body extends ConsumerWidget {
     double held(String side) =>
         mine.where((p) => p.side == side).fold(0.0, (a, p) => a + p.shares);
     final status = MarketStatus.from(m.status, m.closeAt);
+    final isAdmin = ref.watch(_isAdminProvider).value ?? false;
+    final loc = ref.watch(marketLocationProvider(m.id)).value;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -124,6 +149,56 @@ class _Body extends ConsumerWidget {
             ),
           ],
         ),
+        const Gap(AppSpace.lg),
+        CloseTimes(m.closeAt),
+        if (loc != null) ...[
+          const Gap(AppSpace.md),
+          AppButton(
+            label: 'Lihat lokasi market',
+            icon: Icons.place_outlined,
+            variant: AppButtonVariant.secondary,
+            expanded: true,
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => MarketLocationPage(title: m.title, point: loc),
+              ),
+            ),
+          ),
+        ],
+        if (m.status == 'resolved' && m.chainStatus != null) ...[
+          const Gap(AppSpace.md),
+          OnchainStatus(
+            status: m.chainStatus,
+            tx: m.chainTx,
+            onRetry: isAdmin
+                ? () async {
+                    try {
+                      await OnchainService().record(m.id);
+                    } catch (_) {
+                      if (context.mounted) {
+                        AppToast.show(
+                          context,
+                          'Pencatatan on-chain gagal. Coba lagi nanti.',
+                          type: ToastType.error,
+                        );
+                      }
+                    }
+                    ref.invalidate(marketProvider(m.id));
+                  }
+                : null,
+          ),
+          if (m.chainStatus == 'confirmed' && m.outcome != null) ...[
+            const Gap(AppSpace.sm),
+            OnchainCheckButton(marketId: m.id, outcome: m.outcome!),
+          ],
+        ],
+        if (m.status == 'resolved' && m.chainStatus == null) ...[
+          const Gap(AppSpace.md),
+          Text(
+            'Diselesaikan sebelum pencatatan on-chain tersedia.',
+            style: AppText.caption,
+          ),
+        ],
         if (m.description != null) ...[
           const Gap(AppSpace.lg),
           Text(m.description!, style: AppText.body),

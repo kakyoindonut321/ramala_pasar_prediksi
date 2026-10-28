@@ -1,7 +1,7 @@
 # PROJECT_CONTEXT.md — Ramala
 
 > **Tujuan**: Referensi lengkap dan terverifikasi untuk asisten AI yang bekerja pada codebase ini. Baca dokumen ini sebelum melakukan perubahan apapun pada proyek.
-> **Terakhir diperbarui**: 2026-10-23
+> **Terakhir diperbarui**: 2026-10-28
 > **Cakupan**: Semua file di bawah `lib/`, `pubspec.yaml`, seluruh file `docs/`, dan migrasi `supabase/migrations/` telah diinspeksi.
 
 ---
@@ -28,8 +28,8 @@ Sumber: `docs/ketentuan_tugas_akhir.txt`
 | Login biometrik                                                              | ✅ `local_auth` dengan fallback PIN                                                  |
 | Database lokal + online                                                      | ✅ sqflite (cache offline) + Supabase (online)                                       |
 | Web service / API (LBS, game, atau multiplatform)                            | ✅ Supabase RPC, Cloudinary, Gemini+Groq, ExchangeRate-API, CoinGecko, OpenStreetMap |
-| Menu navigasi: profil (dengan gambar), saran/kesan, logout                   | ✅ Semua tersedia                                                                    |
-| Konverter mata uang (min. 3) + konverter zona waktu (WIB, WIT, WITA, London) | ✅ 5 mata uang fiat + 3 kripto; 4 zona waktu                                         |
+| Menu navigasi: profil (dengan gambar), saran/kesan, logout                   | ✅ Semua tersedia — saran/kesan ada di halaman About dan form Rate Us                |
+| Konverter mata uang (min. 3) + konverter zona waktu (WIB, WIT, WITA, London) | ✅ 5 mata uang fiat + 3 kripto; 7 zona waktu (ringkas 4, "Semua" tampilkan 7)        |
 | Min. 2 sensor (Akselerometer, Giroskop, dll.)                                | ✅ Keduanya digunakan pada fitur game                                                |
 | Fitur AI/LLM                                                                 | ✅ Chatbot Gemini dengan failsafe Groq                                               |
 | Mini game                                                                    | ✅ Game sensor "Tebak Arah"                                                          |
@@ -52,6 +52,7 @@ Sumber: `docs/ketentuan_tugas_akhir.txt`
 - `supabase_flutter: ^2.18.3` — auth, database, realtime, panggilan RPC
 - `flutter_secure_storage: ^11.2.0` — penyimpanan token sesi (Android Keystore)
 - `local_auth: ^3.0.2` — biometrik (sidik jari/wajah + fallback PIN)
+- `url_launcher: ^6.3.3` — membuka URL eksternal (Etherscan) dari ledger dan badge on-chain
 
 ### Penyimpanan
 
@@ -109,7 +110,7 @@ ramala/
 ├── lib/
 │   ├── main.dart                     # Entry point aplikasi
 │   ├── app.dart                      # RamalaApp (MaterialApp.router)
-│   ├── template.dart                 # SELURUH design system (1131+ baris)
+│   ├── template.dart                 # SELURUH design system (baris bertambah; komponen baru: AppIconButton, AppChipRows, CloseTimes, dsb.)
 │   ├── core/
 │   │   ├── config/env.dart           # Konstanta String.fromEnvironment()
 │   │   ├── error/app_error.dart      # Pemetaan Error → pesan Bahasa Indonesia
@@ -127,11 +128,21 @@ ramala/
 │       ├── auth/{data,presentation}
 │       ├── chatbot/{data,presentation}   # Gemini + Groq failsafe
 │       ├── converter/{data,presentation}
-│       ├── feedback/presentation
+│       ├── about/presentation           # Halaman About (logo, deskripsi, saran & kesan mata kuliah, versi)
+│       ├── feedback/presentation         # Form Rate Us (feedback ke tabel feedback)
 │       ├── game/presentation
 │       ├── ledger/presentation
+│       │   ├── ledger_page.dart              # daftar 50 blok, verifikasi rantai, badge on-chain
+│       │   └── ledger_preview.dart           # BARU — widget preview blok ledger dengan tautan Etherscan
 │       ├── market/{data,domain,presentation}
-│       ├── nearby/presentation
+│       │   ├── presentation/
+│       │   │   ├── market_list_page.dart         # Diganti penuh — chip Untuk kamu/Trending/kategori, modal Filter
+│       │   │   ├── market_detail_page.dart       # ConsumerStatefulWidget, CloseTimes, tombol Lihat lokasi
+│       │   │   ├── market_location_page.dart     # BARU — peta OSM satu pin lokasi market (push via Navigator)
+│       │   │   └── onchain_status.dart, onchain_check_button.dart  # on-chain badge & verifikasi
+│       │   └── data/
+│       │       └── market_repository.dart        # list(), page() (MarketQuery), hasHistory(), logView()
+│       ├── nearby/presentation           # Filter query hanya market status open
 │       ├── notification/{data,domain,presentation}
 │       ├── portfolio/{data,presentation}
 │       ├── profile/{data,presentation}
@@ -153,7 +164,11 @@ ramala/
 │   ├── 001_schema.sql                # Tabel, constraint, trigger, RLS, grant
 │   ├── 001_functions.sql             # Fungsi RPC (trade, admin, ledger, dll.)
 │   ├── 003_topup.sql                 # Tabel & RPC top up koin; set balance awal = 0
-│   └── 007_feedback_admin.sql        # Kolom is_hidden + RPC admin_set_feedback_hidden
+│   ├── 007_feedback_admin.sql        # Kolom is_hidden + RPC admin_set_feedback_hidden
+│   ├── 008_onchain.sql               # Kolom chain_* di markets; update admin_resolve_market (lihat KONTEKS_UPDATE_ONCHAIN)
+│   ├── 009_chain_confirm.sql         # RPC chain_confirm (service_role saja)
+│   ├── 010_foryou.sql                # Tabel market_views; RPC log_market_view + markets_for_you
+│   └── 011_default_avatar.sql        # DEFAULT avatar_url → URL Cloudinary default; update akun lama yang null
 └── env.json                          # ⚠️ BERISI API KEY ASLI — jangan di-commit
 ```
 
@@ -191,31 +206,37 @@ ramala/
 - Belum login → redirect semua route ke `/login`
 - Sudah login di halaman login/register → redirect ke `/pasar`
 
-**Shell routes (5 tab — bottom nav)**:
+**Shell routes (4 tab — bottom nav)**:
 | Tab | Route | Widget | Deskripsi |
 |---|---|---|---|
-| 0 | `/pasar` | `MarketListPage` | Daftar market dengan pencarian dan filter kategori termasuk "Semua" |
+| 0 | `/pasar` | `MarketListPage` | Daftar market — chip Untuk kamu/Trending/kategori, modal Filter & Urutkan |
 | 1 | `/portofolio` | `PortfolioPage` | Posisi, riwayat transaksi, saldo |
 | 2 | `/fitur` | `FeaturesPage` | Menu launcher untuk fitur tambahan |
-| 3 | `/saran` | `FeedbackPage` | Form saran & kesan; admin bisa lihat dan sembunyikan daftar |
-| 4 | `/profil` | `ProfilePage` | Profil user, avatar, biometrik, logout, request top up koin |
+| 3 | `/profil` | `ProfilePage` | Profil user, avatar, biometrik, Rate Us, About, logout, request top up koin |
+
+> **Perubahan dari versi sebelumnya**: Tab `/saran` (tab ke-4) **dihapus**. Total tab sekarang 4 (bukan 5).
 
 **Route detail (di luar shell, layar penuh)**:
 | Route | Widget | Catatan |
 |---|---|---|
 | `/login` | `LoginPage` | Dijaga auth |
 | `/register` | `RegisterPage` | Dijaga auth |
-| `/market/:id` | `MarketDetailPage` | Parameter path `id` |
+| `/market/:id` | `MarketDetailPage` | Parameter path `id`; ConsumerStatefulWidget untuk logView |
 | `/konverter` | `ConverterPage` | Mata uang + kripto + zona waktu; tab waktu hanya tampilkan market yang masih buka |
-| `/nearby` | `NearbyPage` | Peta LBS + daftar terurut |
+| `/nearby` | `NearbyPage` | Peta LBS + daftar terurut; **hanya market `status=open` dan `close_at` belum lewat** |
 | `/game` | `GamePage` | Game sensor |
 | `/chatbot` | `ChatPage` | Chat AI (Gemini + failsafe Groq); limit input 1000 karakter |
 | `/notifikasi` | `NotificationPage` | Daftar notifikasi |
 | `/ledger` | `LedgerPage` | Ledger blockchain |
+| `/topup` | `TopupPage` | Halaman form top up (alternatif dari menu profil) |
+| `/about` | `AboutPage` | Logo, deskripsi aplikasi, saran & kesan mata kuliah, versi 1.0.0 |
+| `/rate` | `FeedbackPage` | Form Rate Us (judul & label diperbarui); akses dari menu profil |
 | `/admin` | `AdminPage` | Khusus admin (tanpa guard client — RPC server yang mengontrol akses) |
 | `/admin/market-baru` | `AdminCreateMarketPage` | Buat market baru dengan gambar, pin peta, dan waktu tutup |
 | `/admin/topup` | `AdminTopupPage` | Daftar permintaan top up; terima/tolak |
 | `/admin/selesaikan` | `AdminResolvePage` | Selesaikan market yang berjalan |
+
+> **Catatan navigasi**: `MarketLocationPage` **tidak terdaftar di GoRouter**. Dibuka via `Navigator.of(context).push(...)` dari `market_detail_page.dart` (dengan membawa `LatLng point` dan `title` langsung).
 
 ---
 
@@ -268,22 +289,28 @@ class Market {
 - `isOpen` dihitung sisi client menggunakan `closeAt` vs waktu sekarang
 - `MarketStatus.from(status, closeAt)` di `template.dart` menambahkan state `closed` yang dihitung
 
-**Daftar market (`market_list_page.dart`)**:
+**Daftar market (`market_list_page.dart`)** — **diganti penuh**:
 
-- Market aktif diurutkan berdasarkan `closeAt` naik (yang segera tutup tampil pertama)
-- Market diselesaikan/dibatalkan dalam seksi yang bisa dilipat, diurutkan `closeAt` turun
-- Filter kategori termasuk opsi **"Semua"** di posisi pertama untuk menampilkan semua market
-- Chip filter kategori dibangkitkan secara dinamis dari kategori yang tersedia
+- **Chip navigasi**: "Untuk kamu" → "Trending" → kategori dinamis (tanpa opsi "Semua" di chip)
+- **Feed default**: "Untuk kamu" jika user pernah trade (dicek via `hasHistoryProvider`), selain itu "Trending"
+- **Tombol tune** (ikon `AppIconButton` dengan badge) di samping search bar membuka **modal Filter & Urutkan**:
+  - Filter status: Aktif / Selesai
+  - Urutan: Trending / Terbaru
+  - Berlaku langsung saat dipilih; tombol **Reset** mengembalikan ke default
+- Chip filter menggunakan `AppChipRows` (dua baris, scroll horizontal)
 - Jika market memiliki `imageUrl`, gambar ditampilkan sebagai icon mirip Polymarket (persegi, opsional)
 - `AppSearchBar` dengan debounce 400ms → memperbarui state `_q` → memantau ulang `marketListProvider(_q)`
 - Cache offline: hanya ketika `query.isEmpty` (via `LocalDb.cachedList`)
 
 **MarketRepository (`market/data/market_repository.dart`)**:
 
-- `list(query)`: menggunakan `ilike` dengan `Validators.likeEscape()` untuk keamanan wildcard, limit 100
+- `list(query)`: menggunakan `ilike` dengan `Validators.likeEscape()` untuk keamanan wildcard, limit 100 (digunakan untuk pencarian teks biasa)
+- `page(MarketQuery q)`: query utama halaman pasar — filter aktif/selesai, kategori, pencarian, urutan di server; punya cabang `foryou` yang memanggil RPC `markets_for_you`
 - `get(id)`: market tunggal berdasarkan UUID
 - `history(id)`: 100 snapshot harga terakhir dari `price_history` (dibalik ke urutan kronologis)
 - `trade()`: memanggil RPC `trade_market`, mengembalikan `amount` dari respons
+- `hasHistory()`: cek apakah user pernah melakukan trade (dicache di `LocalDb`; sekali `true` tetap `true`)
+- `logView(marketId)`: memanggil RPC `log_market_view` untuk mencatat tayangan market (best-effort, kegagalan diabaikan)
 
 **Penetapan harga LMSR (`domain/lmsr.dart`)**:
 
@@ -322,14 +349,20 @@ class Market {
 - Getter `_uid` melempar `AuthException('not_authenticated')` jika `currentUser == null` — mencegah crash saat race condition logout
 - `update()`: update parsial, hanya mengirim field yang tidak null
 - `avatarUrl` dibatasi prefix `https://res.cloudinary.com/` oleh constraint server
+- Avatar default (jika `avatar_url` null): kini diisi otomatis oleh database via migrasi `011_default_avatar.sql`; fallback inisial di `AppAvatar` tetap aktif untuk kasus gambar gagal dimuat
 
 **Halaman profil (`profile_page.dart`)**:
 
+- Kartu identitas: `glow: false` (borderColor: Colors.transparent); cincin oranye di `AppAvatar` tetap ada
 - Upload avatar: `ImagePicker → CloudinaryService.uploadAvatar → ProfileRepository.update`
 - Edit nama: via bottom sheet `askInput()`
 - Toggle biometrik: aktifkan setelah autentikasi ulang + konfirmasi password; nonaktifkan setelah konfirmasi
-- Admin melihat "Panel admin" → `/admin`
 - Menu **"Request Top Up Koin"** → menampilkan form di mana user bisa input jumlah (validasi angka, max 1.000.000 koin); satu request pending per user
+- Menu **Rate Us** → `/rate` (`FeedbackPage`)
+- Menu **About** → `/about` (`AboutPage`)
+- Admin melihat "Panel admin" → `/admin` (urutan: setelah About)
+- Menu **"Ledger blockchain"** telah **dihapus** dari daftar profil (tetap diakses lewat tab Fitur → `/ledger`)
+- **Urutan menu**: Ganti foto, Ubah nama, Biometrik (jika didukung), Top up koin, Rate Us, About, Panel admin (jika admin), Keluar
 - Logout: dialog konfirmasi → `AuthRepository.logout()` → `GoRouter.go('/login')`
 
 **CloudinaryService**:
@@ -411,7 +444,7 @@ class Market {
 ### 7.9 Nearby / LBS (`features/nearby/`)
 
 - Meminta GPS via `geolocator`
-- Mengambil market terbuka dengan `latitude`/`longitude` yang tidak null
+- Mengambil market dengan `latitude`/`longitude` yang tidak null, **`status = 'open'`**, DAN **`close_at > now()`** (kedua kondisi wajib)
 - Menghitung dan mengurutkan berdasarkan jarak sisi client
 - Peta: `flutter_map` dengan tile OpenStreetMap
 - `userAgentPackageName: 'com.example.ramala'` harus cocok dengan `applicationId`
@@ -459,15 +492,23 @@ class Market {
 - Menampilkan market yang berstatus open untuk diselesaikan
 - Pilihan hasil YES/NO → dialog konfirmasi → RPC `admin_resolve_market(p_market, p_outcome)`
 
-### 7.13 Saran & Kesan (`features/feedback/`)
+### 7.13 Rate Us (`features/feedback/`) — sebelumnya "Saran & Kesan"
 
+- Diakses dari menu profil → `/rate`; **tidak lagi** tersedia sebagai tab bottom nav
+- Judul berubah menjadi **"Rate Us"**; pertanyaan tentang pengalaman memakai Ramala; label field: "Kesan tentang Ramala" dan "Saran untuk Ramala"
 - Rating bintang 1–5 (wajib), field kesan + saran (min 5, maks 500 karakter)
-- Insert ke tabel `feedback` langsung (tanpa layer repository)
+- Insert ke tabel `feedback` langsung (tanpa layer repository) — **tidak ada perubahan logika atau skema**
 - **Hak istimewa admin**:
   - Admin dapat melihat daftar semua saran & kesan yang dikirim pengguna (di bawah form input)
   - Admin dapat menyembunyikan/menampilkan kembali entri feedback via RPC `admin_set_feedback_hidden(p_id, p_hidden)`
   - Kebijakan RLS `feedback_admin_select` memastikan hanya admin yang bisa membaca semua feedback
   - Kolom `is_hidden` di tabel `feedback` ditambahkan via migrasi `007_feedback_admin.sql`
+
+### 7.14 About (`features/about/presentation/about_page.dart`) — baru
+
+- Diakses dari menu profil → `/about`
+- Berisi: logo Ramala, deskripsi aplikasi (sudah diisi, tanpa kata "dummy"), seksi **"Saran & Kesan Mata Kuliah"** (diisi sendiri oleh penulis), dan versi `1.0.0`
+- Memenuhi persyaratan tugas "menu saran dan kesan" dari sisi konten akademik
 
 ---
 
@@ -480,10 +521,13 @@ Semua provider: `FutureProvider.autoDispose` dengan `retry: (_, __) => null` (ta
 | Provider                           | Lokasi                                             | Catatan                                        |
 | ---------------------------------- | -------------------------------------------------- | ---------------------------------------------- |
 | `routerProvider`                   | `core/router/app_router.dart`                      | Termasuk listenable auth `_AuthRefresh`        |
-| `marketListProvider(q)`            | `market/presentation/market_providers.dart`        | Family berdasarkan query pencarian             |
+| `marketListProvider(q)`            | `market/presentation/market_providers.dart`        | Family string; pencarian teks, cache offline   |
+| `marketPageProvider(q)`            | `market/presentation/market_providers.dart`        | Family `MarketQuery`; query utama halaman pasar |
 | `marketProvider(id)`               | sama                                               | Family berdasarkan UUID market                 |
 | `priceHistoryProvider(id)`         | sama                                               | Family berdasarkan UUID market                 |
-| `categoriesProvider`               | `market/presentation/market_providers.dart`        | Daftar kategori unik + "semua"                 |
+| `categoriesProvider`               | `market/presentation/market_providers.dart`        | Daftar kategori unik                           |
+| `hasHistoryProvider`               | `market/presentation/market_providers.dart`        | Cek apakah user pernah trade (di-cache)        |
+| `marketLocationProvider(id)`       | `market/presentation/market_location_page.dart`    | Inline; koordinat market untuk peta lokasi     |
 | `portfolioProvider`                | `portfolio/presentation/portfolio_providers.dart`  |                                                |
 | `tradesProvider`                   | sama                                               |                                                |
 | `profileProvider`                  | `profile/presentation/profile_providers.dart`      |                                                |
@@ -493,7 +537,7 @@ Semua provider: `FutureProvider.autoDispose` dengan `retry: (_, __) => null` (ta
 | `ledgerProvider`                   | `ledger/presentation/ledger_page.dart`             | Didefinisikan inline                           |
 | `_boardProvider`                   | `game/presentation/game_page.dart`                 | Didefinisikan inline                           |
 | `_fiatProvider`, `_cryptoProvider` | `converter/presentation/converter_page.dart`       | Didefinisikan inline                           |
-| `_nearbyProvider`                  | `nearby/presentation/nearby_page.dart`             | Mengembalikan named record                     |
+| `_nearbyProvider`                  | `nearby/presentation/nearby_page.dart`             | Inline; hanya market open dan close_at belum lewat |
 
 ### Strategi Cache
 
@@ -507,19 +551,20 @@ Cache keys: `markets:list`, `portfolio:<uid>`, `notif:<uid>`, `rates:fiat`, `rat
 
 ### Tabel Database Supabase
 
-| Tabel            | Kolom Utama                                                                                                                                                           | Akses Client                                              |
-| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| `profiles`       | `id, username, display_name, avatar_url, role, created_at`                                                                                                            | SELECT semua; UPDATE `username, display_name, avatar_url` |
-| `wallets`        | `user_id, balance` (default **0** sejak migrasi 003)                                                                                                                  | SELECT milik sendiri                                      |
-| `markets`        | `id, title, description, category, image_url, latitude, longitude, close_at, status, outcome, b, q_yes, q_no, price_yes, volume, created_by, created_at, resolved_at` | SELECT semua                                              |
-| `positions`      | `user_id, market_id, side, shares, cost, realized_pnl`                                                                                                                | SELECT milik sendiri                                      |
-| `trades`         | `id, user_id, market_id, side, action, shares, amount, price_yes_after, created_at`                                                                                   | SELECT milik sendiri                                      |
-| `price_history`  | `market_id, price_yes, created_at`                                                                                                                                    | SELECT                                                    |
-| `ledger`         | `idx, prev_hash, data, hash, created_at`                                                                                                                              | SELECT saja                                               |
-| `notifications`  | `id, user_id, type, title, body, data (JSONB), is_read, created_at`                                                                                                   | SELECT milik sendiri; UPDATE `is_read`                    |
-| `feedback`       | `id, user_id, impression, suggestion, rating, is_hidden, created_at`                                                                                                  | INSERT milik sendiri; SELECT semua (admin saja via RLS)   |
-| `game_scores`    | `game, score, user_id, created_at`                                                                                                                                    | INSERT; SELECT                                            |
-| `topup_requests` | `id, user_id, amount, status, created_at, resolved_at, resolved_by`                                                                                                   | SELECT milik sendiri atau admin                           |
+| Tabel            | Kolom Utama                                                                                                                                                                                             | Akses Client                                              |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| `profiles`       | `id, username, display_name, avatar_url (DEFAULT url Cloudinary), role, created_at`                                                                                                                     | SELECT semua; UPDATE `username, display_name, avatar_url` |
+| `wallets`        | `user_id, balance` (default **0** sejak migrasi 003)                                                                                                                                                    | SELECT milik sendiri                                      |
+| `markets`        | `id, title, description, category, image_url, latitude, longitude, close_at, status, outcome, b, q_yes, q_no, price_yes, volume, created_by, created_at, resolved_at, resolve_hash, chain_tx, chain_status, chain_at` | SELECT semua                                              |
+| `positions`      | `user_id, market_id, side, shares, cost, realized_pnl`                                                                                                                                                  | SELECT milik sendiri                                      |
+| `trades`         | `id, user_id, market_id, side, action, shares, amount, price_yes_after, created_at`                                                                                                                     | SELECT milik sendiri                                      |
+| `price_history`  | `market_id, price_yes, created_at`                                                                                                                                                                      | SELECT                                                    |
+| `ledger`         | `idx, prev_hash, data, hash, created_at`                                                                                                                                                                | SELECT saja                                               |
+| `notifications`  | `id, user_id, type, title, body, data (JSONB), is_read, created_at`                                                                                                                                     | SELECT milik sendiri; UPDATE `is_read`                    |
+| `feedback`       | `id, user_id, impression, suggestion, rating, is_hidden, created_at`                                                                                                                                    | INSERT milik sendiri; SELECT semua (admin saja via RLS)   |
+| `game_scores`    | `game, score, user_id, created_at`                                                                                                                                                                      | INSERT; SELECT                                            |
+| `topup_requests` | `id, user_id, amount, status, created_at, resolved_at, resolved_by`                                                                                                                                     | SELECT milik sendiri atau admin                           |
+| `market_views`   | `user_id, market_id, category, viewed_at`                                                                                                                                                               | INSERT via RPC `log_market_view`; tidak ada SELECT langsung |
 
 ### RPC Supabase
 
@@ -527,13 +572,16 @@ Cache keys: `markets:list`, `portfolio:<uid>`, `notif:<uid>`, `rates:fiat`, `rat
 | --------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------ |
 | `trade_market`              | `p_market uuid, p_side, p_action, p_shares numeric 0.01–1000`                       | `{trade_id, shares, amount, price_yes, balance}` |
 | `admin_create_market`       | `p_title, p_close_at, p_description, p_category, p_b, p_image_url?, p_lat?, p_lng?` | uuid                                             |
-| `admin_resolve_market`      | `p_market uuid, p_outcome 'yes'\|'no'`                                              | void                                             |
+| `admin_resolve_market`      | `p_market uuid, p_outcome 'yes'\|'no'`                                              | void (+ catat hash ke `resolve_hash`, chain_status `pending`) |
 | `verify_ledger`             | tidak ada                                                                           | `int?` (idx yang rusak) atau null                |
 | `is_admin`                  | tidak ada                                                                           | bool                                             |
 | `request_topup`             | `p_amount integer`                                                                  | uuid (ID request)                                |
 | `admin_approve_topup`       | `p_id uuid`                                                                         | void                                             |
 | `admin_reject_topup`        | `p_id uuid`                                                                         | void                                             |
 | `admin_set_feedback_hidden` | `p_id uuid, p_hidden boolean`                                                       | void                                             |
+| `log_market_view`           | `p_market uuid, p_category text`                                                    | void                                             |
+| `markets_for_you`           | `p_limit int`                                                                       | tabel market (urut skor kategori: 3×trade + view)|
+| `chain_confirm`             | `p_market uuid, p_tx text`                                                          | void (hanya `service_role`)                      |
 
 ### Tabel sqflite (`ramala.db`)
 
@@ -586,6 +634,9 @@ Cache keys: `markets:list`, `portfolio:<uid>`, `notif:<uid>`, `rates:fiat`, `rat
 8. **Hanya satu `AppButton` primary per layar/panel**.
 9. `AppNavItem(icon, label, [activeIcon])` — **konstruktor positional**.
 10. `MarketStatus.from(status, closeAt)` — selalu gunakan ini, bukan string `status` mentah.
+11. `AppIconButton(icon, onPressed, {badge})` — tombol ikon opsional dengan badge angka (digunakan misal di tombol filter/tune).
+12. `AppChipRows(chips, onSelected, {rows: 2})` — chip dua baris dengan scroll horizontal (digunakan di daftar market).
+13. `CloseTimes(closeAt)` — widget ringkasan zona waktu penutupan market; tampilkan 4 zona default, tombol "Semua" tampilkan 7 (WIB, WITA, WIT, London, New York, Tokyo, Abu Dhabi).
 
 ---
 
@@ -663,7 +714,11 @@ flutter run --dart-define-from-file=env.json
 7. **Race condition logout** — bisa muncul kembali setelah hot reload; gunakan restart penuh
 8. **Signing release** — menggunakan keystore debug
 9. **Notifikasi background belum diuji sepenuhnya** — hanya notifikasi "setelah market diselesaikan" yang terkonfirmasi berfungsi
-10. **Workmanager di HP OEM** — task background bisa tertunda jauh lebih dari 15 menit di mode hemat baterai
+10. **Workmanager di HP OEM** — task background bisa tertunda jauh melampaui 15 menit di mode hemat baterai
+11. **Fitur "Untuk kamu" belum diuji dengan data banyak** — fungsional, namun relevansi rekomendasi baru teruji dengan data trade yang cukup
+12. **Seksi "Saran & Kesan Mata Kuliah" di `AboutPage`** masih placeholder — harus diisi sendiri oleh penulis sebelum presentasi
+13. **Kode Edge Function `record-onchain`** hanya ada di Supabase dashboard, belum ada salinan di repo (lihat `KONTEKS_UPDATE_ONCHAIN.md`)
+14. **Saldo sETH wallet dev** bergantung pada faucet — habis → chain gagal; isi ulang sebelum demo
 
 ---
 
@@ -712,11 +767,14 @@ flutter run --dart-define-from-file=env.json
 - **Chatbot**: Selalu gunakan `AiChatService` (bukan `GeminiService` atau `GroqService` langsung); batas input `maxLength: 1000`
 - **Konverter Waktu**: Filter daftar market agar hanya menampilkan market yang `isOpen == true`
 - **Trade sheet**: Input share harus berupa `AppTextField` dengan angka langsung; tetap sertakan chip cepat; validasi ketat wajib
-- **Market list**: Selalu sertakan opsi "Semua" di posisi pertama chip filter kategori; tampilkan `imageUrl` sebagai icon persegi jika ada
+- **Market list**: Chip navigasi adalah Untuk kamu / Trending / kategori (tanpa "Semua"); feed default dipilih berdasarkan `hasHistoryProvider`; jangan tambahkan opsi "Semua" kembali
+- **Nearby**: Query hanya mengambil market dengan `status = 'open'` — jangan ubah filter ini
+- **Market detail**: Catat view via `logView()` saat halaman dibuka; tampilkan `CloseTimes` dan tombol "Lihat lokasi market" hanya jika market punya koordinat
 - **Top up**: Validasi angka di client (1–1.000.000); satu pending per user — tangani error `pending_exists`
 - **Admin market**: `p_image_url` harus dikirim ke RPC jika gambar dipilih; koordinat berasal dari `PinPickerPage`
 - **Admin top up**: Setelah approve/reject, request dihapus dari daftar (re-fetch / invalidasi provider)
-- **Feedback admin**: List feedback hanya tampil untuk admin (cek `is_admin()` atau role di client); panggil `admin_set_feedback_hidden` untuk hide/unhide
+- **Rate Us / Feedback admin**: List feedback hanya tampil untuk admin (cek `is_admin()` atau role di client); panggil `admin_set_feedback_hidden` untuk hide/unhide; route `/rate` bukan tab lagi
+- **About**: Jangan tambahkan input user di `AboutPage` — konten statis dari penulis
 
 ---
 
@@ -734,7 +792,7 @@ flutter run --dart-define-from-file=env.json
 
 ### Diinspeksi Penuh
 
-Semua file Dart di bawah `lib/` (termasuk `template.dart`), `pubspec.yaml`, semua 6 file docs, `AndroidManifest.xml`, `build.gradle.kts`, `env.json`, dan semua 4 file migrasi di `supabase/migrations/`. `MainActivity.kt` diinspeksi via grep (mengkonfirmasi `FlutterFragmentActivity`).
+Semua file Dart di bawah `lib/` (termasuk `template.dart`), `pubspec.yaml`, semua file docs, `AndroidManifest.xml`, `build.gradle.kts`, `env.json`, dan semua file migrasi di `supabase/migrations/`. `MainActivity.kt` diinspeksi via grep (mengkonfirmasi `FlutterFragmentActivity`).
 
 ### Tidak Diinspeksi
 
